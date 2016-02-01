@@ -6,14 +6,13 @@ sources := $(shell find -wholename './src/*.cpp')
 headers := $(shell find -wholename './src/*.h')
 resources := $(shell find -wholename './src/*.qrc')
 
-# Production:
-# sanitizers := -fsanitize=undefined,safe-stack,cfi
-# sanitizers := -fsanitize=undefined
+# sanitizers ?= -fsanitize=undefined,safe-stack,cfi
+# https://llvm.org/bugs/show_bug.cgi?id=22757
 sanitizers :=
 
 # C++14 Compiler
-CXX ?= clang++
-flags := -std=c++14 -fPIC -g -Isrc $(sanitizers)
+CXX := clang++-3.8
+flags := -std=c++14 -O3 -fPIC -g -Isrc
 flags += -Wall -Wextra -Wno-unused-parameter -Werror=return-type
 flags += -Werror=switch -Wdocumentation
 flags += -ftemplate-backtrace-limit=0
@@ -25,9 +24,8 @@ lto := -flto
 # Package config flags
 libs := $(if ${packages}, $(shell pkg-config --libs ${packages}))
 
-deps := ${CXX} $(flags) -MM -MP -MG
 precompile := ${CXX} $(flags)
-compile := ${CXX} $(flags) $(lto) $(precompiled) $(defines)
+compile := ${CXX} $(flags) $(sanitizers) $(lto) $(precompiled) $(defines)
 link := ${CXX} $(flags) -fuse-ld=gold $(sanitizers) $(lto) $(libs)
 tidy := clang-tidy -checks='*,-clang-analyzer-alpha.deadcode.UnreachableCode'
 
@@ -55,9 +53,8 @@ build: $(program) test
 build/%.d: src/%.cpp
 	@echo "Deps  " $*.cpp
 	@mkdir -p $(dir $@)
-	@$(deps) -MF $@ -MT "build/$*.o $@" $<
+	@${CXX} $(flags) -MM -MP -MG -MF $@ -MT "build/$*.o $@" $<
 
-# TODO: Remove local headers
 build/precompiled.h:
 	@echo "Inc   " precompiled.h
 	@grep -h "#include <" $(sources) $(headers) | sort | uniq > $@
