@@ -1,6 +1,8 @@
-# EntropyCoder
+# EntropyCoder [![Build Status](https://travis-ci.org/Recmo/EntropyCoder.svg)](https://travis-ci.org/Recmo/EntropyCoder) [![Documentation Status](https://readthedocs.org/projects/entropycoder/badge/?version=latest)](http://entropycoder.readthedocs.org/en/latest/?badge=latest)
 
-[![Build Status](https://travis-ci.org/Recmo/EntropyCoder.svg)](https://travis-ci.org/Recmo/EntropyCoder)
+<!-- https://landscape.io/ -->
+
+<!-- http://shields.io/ -->
 
 Library for optimal compression using entropy/arithmetic/range coding.
 
