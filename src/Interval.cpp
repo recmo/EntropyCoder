@@ -100,6 +100,24 @@ bool Interval::overlaps(const Interval& interval) const
 	return includes(interval.base) && !includes(interval);
 }
 
+Interval::uint64 Interval::descale(Interval::uint64 value) const
+{
+	if(!includes(value)) {
+		throw std::range_error("Value not in interval.");
+	}
+	
+	// value = (value - base) · 2⁶⁴ / (range + 1)
+	if(range == max) {
+		return value - base;
+	} else {
+		assert(value - base < range + 1);
+		std::uint64_t q, r;
+		std::tie(q, r) = div128(value - base, 0, range + 1);
+		q += (r >= msb) ? 1 : 0;
+		return q;
+	}
+}
+
 void Interval::update(const Interval& symbol, bool* carry)
 {
 	// Check if we are normalized
