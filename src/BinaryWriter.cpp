@@ -1,6 +1,25 @@
 #include "BinaryWriter.h"
 #include <cassert>
 
+/* Bijective encoding to finitely odd numbers:
+
+ ↔ 1
+0100 0000 ↔ 01
+1100 0000 ↔ 11
+0010 0000 ↔ 001
+0110 0000 ↔ 011
+1010 0000 ↔ 101
+1110 0000 ↔ 111
+0001 0000 ↔ 0001
+          ⋮
+1111 1111 ↔ 1111 1111
+0000 0000 ↔ 0000 0000 1
+1000 0000 ↔ 0000 0001 1
+0000 0000 0000 0000 ↔ 0000 0010 1
+0000 0000 0000 0000 ↔ 0000 0010 1
+
+*/
+
 BinaryWriter::~BinaryWriter()
 {
 	// Flush carry buffer
@@ -19,12 +38,11 @@ BinaryWriter::~BinaryWriter()
 		buffer <<= (buffer_size - position);
 		out << buffer;
 	}
-	
-	/// TODO partial buffer when buffer is more than one byte
 }
 
 void BinaryWriter::write_zero()
 {
+	std::cerr << "ZERO\n";
 	// Flush the carry buffer without adding a carry
 	if(carry_buffer != 0) {
 		// Write prefix zero
@@ -42,6 +60,7 @@ void BinaryWriter::write_zero()
 
 void BinaryWriter::write_one()
 {
+	std::cerr << "ONE\n";
 	if(carry_buffer == 0) {
 		immediate_one();
 	} else {
@@ -51,6 +70,7 @@ void BinaryWriter::write_one()
 
 void BinaryWriter::add_carry()
 {
+	std::cerr << "CARRY\n";
 	if(carry_buffer == 0) {
 		throw std::runtime_error("Nothing to add carry to.");
 	}
