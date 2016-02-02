@@ -20,6 +20,8 @@ public:
 	/// possible to propagate the carry.
 	void add_carry();
 	
+	bool can_add_carry() const { return carry_buffer != 0; }
+	
 private:
 	std::ostream& out;
 	
