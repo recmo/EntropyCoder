@@ -8,28 +8,32 @@ EntropyReader::EntropyReader(std::istream& input)
 : br(input)
 {
 	for(uint i = 0; i < Interval::bits; ++i) {
-		current.base <<= 1;
-		current.base |= br.read_bit() ? 1 : 0;
+		value <<= 1;
+		if(!br.eof()) {
+			value |= br.read_bit() ? 1 : 0;
+		}
 	}
 }
 
 bool EntropyReader::eof() const
 {
-	return eof_count == Interval::bits;
+	return eof_count >= Interval::bits;
+}
+
+EntropyReader::uint64 EntropyReader::read() const
+{
+	return current.descale(value);
 }
 
 void EntropyReader::read(const Interval& symbol)
 {
 	current.update(symbol);
-	
-	while(!current.is_normalized()) {
-		current.base <<= 1;
-		current.range <<= 1;
+	for(bool bit: current.normalize()) {
+		value <<= 1;
 		if(!br.eof()) {
-			current.base |= br.read_bit() ? 1 : 0;
+			value |= br.read_bit() ? 1 : 0;
 		} else {
 			++eof_count;
 		}
-		current.range |= 1;
 	}
 }
