@@ -9,9 +9,11 @@
 std::ostream& operator<<(std::ostream& out, const Interval& interval)
 {
 	out << "(";
-	out << "0x" << std::setw(16) << std::setfill('0') << std::hex << interval.base;
+	out << "0x" << std::setw(16) << std::setfill('0') << std::hex;
+	out << interval.base;
 	out << ", ";
-	out << "0x" << std::setw(16) << std::setfill('0') << std::hex << interval.range;
+	out << "0x" << std::setw(16) << std::setfill('0') << std::hex;
+	out << interval.range;
 	out << ")";
 	out << std::dec;
 	return out;
@@ -81,7 +83,11 @@ bool Interval::is_goofy() const
 
 bool Interval::includes(Interval::uint64 value) const
 {
-	return value >= base && (value - base == 0 || value - base - 1 < range);
+	if(!is_goofy()) {
+		return value >= base && (value - base == 0 || value - base - 1 < range);
+	} else {
+		return value >= base || value < base + range + 1;
+	}
 }
 
 bool Interval::includes(const Interval& interval) const
