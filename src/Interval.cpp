@@ -114,7 +114,7 @@ void Interval::update(const Interval& symbol, bool* carry)
 	
 	// Calculate the new base
 	uint64 h, l;
-	std::tie(h, l) = mulq(symbol.base, range);
+	std::tie(h, l) = mul128(symbol.base, range);
 	std::tie(h, l) = add128(h, l, symbol.base);
 	const uint64 t = h + (l > 0 ? 1 : 0);
 	base += t;
@@ -125,7 +125,7 @@ void Interval::update(const Interval& symbol, bool* carry)
 	}
 	
 	// Calculate the new range
-	std::tie(h, l) = mulq(symbol.base + symbol.range, range);
+	std::tie(h, l) = mul128(symbol.base + symbol.range, range);
 	std::tie(h, l) = add128(h, l, symbol.base + symbol.range);
 	std::tie(h, l) = add128(h, l, range);
 	std::tie(h, l) = add128(h, l, 1);
