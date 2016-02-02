@@ -17,7 +17,10 @@ EntropyReader::EntropyReader(std::istream& input)
 
 bool EntropyReader::eof() const
 {
-	return eof_count >= Interval::bits;
+	if(br.eof() && value == 0) {
+		throw std::runtime_error("Invalid ending on input file.");
+	}
+	return br.eof() && value == current.ending();
 }
 
 EntropyReader::uint64 EntropyReader::read() const
