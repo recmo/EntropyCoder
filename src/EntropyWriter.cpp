@@ -7,7 +7,19 @@ typedef std::uint64_t uint64;
 
 EntropyWriter::~EntropyWriter()
 {
-	write(Interval{Interval::msb, 1});
+	bool carry;
+	uint64 end = current.ending(&carry);
+	if(carry) {
+		bw.add_carry();
+	}
+	while(end != 0) {
+		if((end & Interval::msb) != 0) {
+			bw.write_one();
+		} else {
+			bw.write_zero();
+		}
+		end <<= 1;
+	}
 }
 
 void EntropyWriter::write(const Interval& symbol)
