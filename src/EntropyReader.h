@@ -2,6 +2,7 @@
 #include <cstdint>
 #include "BinaryReader.h"
 #include "Interval.h"
+#include "Ending.h"
 
 class EntropyReader {
 public:
@@ -16,5 +17,5 @@ private:
 	BinaryReader br;
 	Interval current;
 	Interval::uint64 value;
-	uint eof_count = 0;
+	Ending ending;
 };
