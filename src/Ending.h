@@ -1,3 +1,4 @@
+#pragma once
 #include "Interval.h"
 #include <vector>
 
@@ -5,13 +6,14 @@ class Ending {
 public:
 	typedef Interval::uint64 uint64;
 	
-	uint64 end(bool* const carry  = nullptr);
+	uint64 end(bool* const carry = nullptr) const;
 	
 	void reserve_current();
 	void prune(const Interval& interval);
 	void prune_carry();
 	void prune_one();
 	void prune_zero();
+	void generate_ending();
 	
 private:
 	enum State {
