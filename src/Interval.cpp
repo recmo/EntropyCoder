@@ -8,14 +8,25 @@
 
 std::ostream& operator<<(std::ostream& out, const Interval& interval)
 {
-	out << "(";
-	out << "0x" << std::setw(16) << std::setfill('0') << std::hex;
-	out << interval.base;
-	out << ", ";
-	out << "0x" << std::setw(16) << std::setfill('0') << std::hex;
-	out << interval.range;
-	out << ")";
-	out << std::dec;
+	if(!interval.is_goofy()) {
+		out << "[";
+		out << "0x" << std::setw(16) << std::setfill('0') << std::hex;
+		out << interval.base;
+		out << ", ";
+		out << "0x" << std::setw(16) << std::setfill('0') << std::hex;
+		out << interval.base + interval.range + 1;
+		out << ")";
+		out << std::dec;
+	} else {
+		out << " ";
+		out << "0x" << std::setw(16) << std::setfill('0') << std::hex;
+		out << (interval.base + interval.range + 1);
+		out << ")[";
+		out << "0x" << std::setw(16) << std::setfill('0') << std::hex;
+		out << interval.base;
+		out << " ";
+		out << std::dec;
+	}
 	return out;
 }
 
