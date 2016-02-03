@@ -6,6 +6,12 @@
 
 Library for optimal compression using entropy/arithmetic/range coding.
 
+## Why not a 64 bit coder?
+
+While a binary coder is simpler and allows more optimization, it can only encode a binary choice at a time. At best it will produce one bit at a time.
+
+A 64 bit coder is slower to encode a symbol (though this implementation aims to be fast). Yet it can handle a very large alphabet, and if the model permits, encode up to 63 bits at a time.
+
 ## Getting up and running
 
 **Configuring your system**:
@@ -35,6 +41,11 @@ Make sure clang supports `-std=c++14`. The following should not produce errors:
 **Submitting changes**:
 
 *To be written*
+
+## Learn more
+
+* [Data Compression Explained (Matt Mahoney)](http://mattmahoney.net/dc/dce.html)
+
 
 ## Appendix
 

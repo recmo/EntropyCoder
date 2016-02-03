@@ -16,7 +16,7 @@ private:
 	BinaryWriter bw;
 	Interval current;
 	std::vector<std::vector<bool>> reserved_endings{};
-	std::vector<bool> ending{false, true};
+	std::vector<bool> ending{false};
 	
 	void remove_endings_out_of_interval();
 	void remove_endings_with_carry();
