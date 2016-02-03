@@ -12,6 +12,16 @@ While a binary coder is simpler and allows more optimization, it can only encode
 
 A 64 bit coder is slower to encode a symbol (though this implementation aims to be fast). Yet it can handle a very large alphabet, and if the model permits, encode up to 63 bits at a time.
 
+
+## Perfection
+
+If we encode symbols with probability $0.5$ then the outcome should be exactly the bits we feed in plus a final one.
+
+If we encode a stream of $n$ identical symbols with probability $0$ or $1$ then the outcome should be the $n$th finitely odd number. This effectively encodes only the length of the stream.
+
+If we encode symbols with probabilities that are multiples of $2⁻ⁿ$ for some $n$ then we output should be equivalent to that of some Huffman code, followed by a trailing $1$.
+
+
 ## Getting up and running
 
 **Configuring your system**:
