@@ -69,25 +69,86 @@ void test(const Inputs& inputs, double probability)
 TEST(Empty)
 {
 	const Inputs inputs = generate(0);
+	test(inputs, 0.1);
+	test(inputs, 0.125);
+	test(inputs, 0.2);
 	test(inputs, 0.25);
+	test(inputs, 0.3);
+	test(inputs, 0.4);
 	test(inputs, 0.5);
+	test(inputs, 0.6);
 	test(inputs, 0.75);
+	test(inputs, 0.7);
+	test(inputs, 0.8);
+	test(inputs, 0.9);
 }
 
 TEST(One)
 {
 	const Inputs inputs = generate(1);
+	test(inputs, 0.1);
+	test(inputs, 0.125);
+	test(inputs, 0.2);
 	test(inputs, 0.25);
+	test(inputs, 0.3);
+	test(inputs, 0.4);
 	test(inputs, 0.5);
+	test(inputs, 0.6);
 	test(inputs, 0.75);
+	test(inputs, 0.7);
+	test(inputs, 0.8);
+	test(inputs, 0.9);
+}
+
+TEST(Two)
+{
+	const Inputs inputs = generate(2);
+	test(inputs, 0.1);
+	test(inputs, 0.125);
+	test(inputs, 0.2);
+	test(inputs, 0.25);
+	test(inputs, 0.3);
+	test(inputs, 0.4);
+	test(inputs, 0.5);
+	test(inputs, 0.6);
+	test(inputs, 0.75);
+	test(inputs, 0.7);
+	test(inputs, 0.8);
+	test(inputs, 0.9);
+}
+
+TEST(Three)
+{
+	const Inputs inputs = generate(3);
+	test(inputs, 0.1);
+	test(inputs, 0.125);
+	test(inputs, 0.2);
+	test(inputs, 0.25);
+	test(inputs, 0.3);
+	test(inputs, 0.4);
+	test(inputs, 0.5);
+	test(inputs, 0.6);
+	test(inputs, 0.75);
+	test(inputs, 0.7);
+	test(inputs, 0.8);
+	test(inputs, 0.9);
 }
 
 TEST(Eight)
 {
 	const Inputs inputs = generate(8);
+	test(inputs, 0.1);
+	test(inputs, 0.125);
+	test(inputs, 0.2);
 	test(inputs, 0.25);
+	test(inputs, 0.3);
+	test(inputs, 0.4);
 	test(inputs, 0.5);
+	test(inputs, 0.6);
 	test(inputs, 0.75);
+	test(inputs, 0.7);
+	test(inputs, 0.8);
+	test(inputs, 0.9);
 }
 
 }

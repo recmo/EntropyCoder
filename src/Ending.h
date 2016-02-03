@@ -13,7 +13,7 @@ public:
 	void prune_carry();
 	void prune_one();
 	void prune_zero();
-	void generate_ending();
+	void generate_ending(const Interval& interval);
 	
 private:
 	enum State {
@@ -31,7 +31,6 @@ private:
 	void remove_endings_without_carry();
 	void shift_endings_with_zero();
 	void shift_endings_with_one();
-	bool is_valid(const End& ending);
+	bool is_valid(const Interval& interval, const End& ending);
 	bool is_reserved(const End& ending);
-	End next_available_ending();
 };

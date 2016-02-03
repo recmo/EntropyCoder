@@ -18,4 +18,5 @@ private:
 	Interval current;
 	Interval::uint64 value;
 	Ending ending;
+	uint64 past_end = 0;
 };

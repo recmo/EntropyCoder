@@ -1,7 +1,7 @@
 #include "Ending.h"
 #include <stdexcept>
 
-bool print = false;
+constexpr bool print = false;
 
 std::ostream& operator<<(std::ostream& out, const std::vector<bool>& end)
 {
@@ -55,37 +55,23 @@ void Ending::reserve_current()
 
 void Ending::prune(const Interval& interval)
 {
-	// TODO
-	/*
-	assert(ending.size() >= 1);
-	uint64 end = 0UL;
-	uint64 bit = Interval::msb;
-	for(auto i = ending.begin() + 1; i != ending.end(); ++i) {
-		end |= *i ? bit : 0;
-		bit >>= 1;
-	}
-	if(print) {
-		std::cerr << " = ";
-		std::cerr << "0x" << std::setw(16) << std::setfill('0') << std::hex;
-		std::cerr  << end;
-	}
-	*/
-	/*
-	if(ending[0] == true) {
-		return interval.is_goofy() && end < (interval.base + interval.range + 1);
-	} else {
-		if(interval.is_goofy()) {
-			return end >= interval.base;
-		} else {
-			return interval.includes(end);
+	if(print) std::cerr << state << " prune " << interval << " " << reserved_endings << "\n";
+	Set new_reserved_endings;
+	for(const End& end: reserved_endings) {
+		
+		if(!is_valid(interval, end)) {
+			continue;
 		}
+		
+		new_reserved_endings.push_back(end);
 	}
-	*/
+	reserved_endings = new_reserved_endings;
+	if(print) std::cerr << " = " << reserved_endings << "\n";
 }
 
 void Ending::prune_carry()
 {
-	// std::cerr << state << " Prune carry: " << reserved_endings << "\n";
+	if(print)  std::cerr << state << " Prune carry: " << reserved_endings << "\n";
 	if(state == s0p) {
 		state = s1n;
 		
@@ -125,12 +111,12 @@ void Ending::prune_carry()
 	} else {
 		throw std::logic_error("Can not add carry in current state.");
 	}
-	// std::cerr << "= " << reserved_endings << "\n";
+	if(print)  std::cerr << "= " << reserved_endings << "\n";
 }
 
 void Ending::prune_zero()
 {
-	// std::cerr << state << " Prune zero: " << reserved_endings << "\n";
+	if(print)  std::cerr << state << " Prune zero: " << reserved_endings << "\n";
 	if(state == s0p || state == s1p) {
 		state = s0p;
 		
@@ -170,12 +156,12 @@ void Ending::prune_zero()
 	} else {
 		throw std::logic_error("Invalid state.");
 	}
-	// std::cerr << "= " << reserved_endings << "\n";
+	if(print)  std::cerr << "= " << reserved_endings << "\n";
 }
 
 void Ending::prune_one()
 {
-	// std::cerr << state << " Prune one: " << reserved_endings << "\n";
+	if(print) std::cerr << state << " Prune one: " << reserved_endings << "\n";
 	if(state == s0p) {
 		state = s1p;
 		
@@ -239,64 +225,70 @@ void Ending::prune_one()
 	} else {
 		throw std::logic_error("Invalid state.");
 	}
-	// std::cerr << "= " << reserved_endings << "\n";
+	if(print) std::cerr << "= " << reserved_endings << "\n";
 }
 
-void Ending::generate_ending()
+bool Ending::is_valid(const Interval& interval, const Ending::End& end)
 {
-	assert(ending.empty());
-	ending = next_available_ending();
-	assert(!ending.empty());
-}
-
-bool Ending::is_valid(const Ending::End& ending)
-{
+	// Remove endings that require carry the interval excludes carry
+	if(end.at(0) == true && !interval.is_goofy()) {
+		return false;
+	}
+	
+	// Calculate the value of the ending
+	uint64 value = 0UL;
+	uint64 bit = Interval::msb;
+	for(auto i = end.begin() + 1; i != end.end(); ++i) {
+		value |= *i ? bit : 0;
+		bit >>= 1;
+	}
+	
+	// Remove endings that are not in the interval
+	if(!interval.includes(value)) {
+		return false;
+	}
 	return true;
 }
-
 
 bool Ending::is_reserved(const End& ending)
 {
 	return std::find(reserved_endings.begin(), reserved_endings.end(), ending) != reserved_endings.end();
 }
 
-std::vector<bool> Ending::next_available_ending()
+void Ending::generate(const Interval& interval)
 {
-	std::vector<bool> ending{state == s1p};
+	assert(ending.empty());
+	ending = std::vector<bool>{state == s1p};
 	
-	//std::cerr << "Next: " << ending;
-	//print = true;
-	//std::cerr << (!is_valid(ending) ? " invalid" : "");
-	//std::cerr << (is_reserved(ending) ? " reserved" : "");
-	//print = false;
-	if(!is_reserved(ending) && is_valid(ending)) {
-		//std::cerr << " available!\n";
-		return ending;
+	const bool print = false;
+	
+	if(print) std::cerr << "Next: " << ending;
+	if(print) std::cerr << (!is_valid(interval, ending) ? " invalid" : "");
+	if(print) std::cerr << (is_reserved(ending) ? " reserved" : "");
+	if(!is_reserved(ending) && is_valid(interval, ending)) {
+		if(print) std::cerr << " available!\n";
+		return;
 	}
-	//std::cerr << "\n";
+	if(print) std::cerr << "\n";
 	
 	if(state != s1n) {
 		ending[0] = !ending[0];
-		//std::cerr << "Next: " << ending;
-		//print = true;
-		//std::cerr << (!is_valid(ending) ? " invalid" : "");
-		//std::cerr << (is_reserved(ending) ? " reserved" : "");
-		//print = false;
-		if(!is_reserved(ending) && is_valid(ending)) {
-			//std::cerr << " available!\n";
-			return ending;
+		if(print) std::cerr << "Next: " << ending;
+		if(print) std::cerr << (!is_valid(interval, ending) ? " invalid" : "");
+		if(print) std::cerr << (is_reserved(ending) ? " reserved" : "");
+		if(!is_reserved(ending) && is_valid(interval, ending)) {
+			if(print) std::cerr << " available!\n";
+			return;
 		}
-		//std::cerr << "\n";
+		if(print) std::cerr << "\n";
 	}
 	
 	ending = std::vector<bool>{false, true};
-	//std::cerr << "Next: " << ending;
-	//print = true;
-	//std::cerr << (!is_valid(ending) ? " invalid" : "");
-	//std::cerr << (is_reserved(ending) ? " reserved" : "");
-	//print = false;
-	while(is_reserved(ending) || !is_valid(ending)) {
-		//std::cerr << "\n";
+	if(print) std::cerr << "Next: " << ending;
+	if(print) std::cerr << (!is_valid(interval, ending) ? " invalid" : "");
+	if(print) std::cerr << (is_reserved(ending) ? " reserved" : "");
+	while(is_reserved(ending) || !is_valid(interval, ending)) {
+		if(print) std::cerr << "\n";
 		bool carry = true;
 		int n = ending.size() - 2;
 		while(carry && n >= 0) {
@@ -310,12 +302,9 @@ std::vector<bool> Ending::next_available_ending()
 			}
 			ending.push_back(true);
 		}
-		//std::cerr << "Next: " << ending;
-		//print = true;
-		//std::cerr << (!is_valid(ending) ? " invalid" : "");
-		//std::cerr << (is_reserved(ending) ? " reserved" : "");
-		//print = false;
+		if(print) std::cerr << "Next: " << ending;
+		if(print) std::cerr << (!is_valid(interval, ending) ? " invalid" : "");
+		if(print) std::cerr << (is_reserved(ending) ? " reserved" : "");
 	}
-	//std::cerr << " available!\n";
-	return ending;
+	if(print) std::cerr << " available!\n";
 }
