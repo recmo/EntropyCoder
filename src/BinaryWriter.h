@@ -21,6 +21,7 @@ public:
 	void add_carry();
 	
 	bool can_add_carry() const { return carry_buffer != 0; }
+	bool ends_in_one() const { return carry_buffer > 1; }
 	
 private:
 	std::ostream& out;

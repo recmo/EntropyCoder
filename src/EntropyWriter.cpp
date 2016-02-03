@@ -162,10 +162,6 @@ bool print = false;
 bool EntropyWriter::is_valid(const std::vector<bool>& ending) const
 {
 	assert(ending.size() >= 1);
-	if(ending[0] && !current.is_goofy()) {
-		if(print) std::cerr << " can't carry ";
-		return false;
-	}
 	uint64 end = 0UL;
 	uint64 bit = Interval::msb;
 	for(auto i = ending.begin() + 1; i != ending.end(); ++i) {
@@ -178,7 +174,7 @@ bool EntropyWriter::is_valid(const std::vector<bool>& ending) const
 		std::cerr  << end;
 	}
 	if(ending[0] == true) {
-		return end < (current.base + current.range + 1);
+		return current.is_goofy() && end < (current.base + current.range + 1);
 	} else {
 		if(current.is_goofy()) {
 			return end >= current.base;
@@ -195,9 +191,41 @@ bool EntropyWriter::is_reserved(const std::vector<bool>& ending) const
 
 std::vector<bool> EntropyWriter::next_available_ending() const
 {
-	// Try 01, 11, 001, 011, 101,  111, 0001, …
+	// Try (1., 0.), 0.1, 1.1, 0.01, 0.11, 1.01, 1.11, 0.001, …
+	//
+	// Whether we start with 1. or 0. depends on the written sequence:
+	//
+	//    …0111 + 0. ↦ …0111     …1000 + 0. ↦ …1000
+	//    …0111 + 1. ↦ …1000     …1000 + 1. ↦ …1001
+	//
+	// So we want to try 1. before 0. iff the last written digits is a one.
+	//
 	// std::cerr << "Looking for ending, reserved: " << reserved_endings << "\n";
-	std::vector<bool> ending{false, true};
+	std::vector<bool> ending{bw.ends_in_one()};
+	std::cerr << "Next: " << ending;
+	print = true;
+	std::cerr << (!is_valid(ending) ? " invalid" : "");
+	std::cerr << (is_reserved(ending) ? " reserved" : "");
+	print = false;
+	if(!is_reserved(ending) && is_valid(ending)) {
+		std::cerr << " available!\n";
+		return ending;
+	}
+	std::cerr << "\n";
+	
+	ending[0] = !ending[0];
+	std::cerr << "Next: " << ending;
+	print = true;
+	std::cerr << (!is_valid(ending) ? " invalid" : "");
+	std::cerr << (is_reserved(ending) ? " reserved" : "");
+	print = false;
+	if(!is_reserved(ending) && is_valid(ending)) {
+		std::cerr << " available!\n";
+		return ending;
+	}
+	std::cerr << "\n";
+	
+	ending = std::vector<bool>{false, true};
 	std::cerr << "Next: " << ending;
 	print = true;
 	std::cerr << (!is_valid(ending) ? " invalid" : "");
