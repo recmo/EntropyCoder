@@ -8,6 +8,7 @@ typedef std::uint64_t uint64;
 
 EntropyWriter::~EntropyWriter()
 {
+	// std::cerr << "Writing ending\n";
 	bool carry = false;
 	uint64 end = ending.end(&carry);
 	if(carry) {
@@ -51,4 +52,7 @@ void EntropyWriter::write(const Interval& symbol)
 			ending.prune_zero();
 		}
 	}
+	
+	// Generate a new potential ending
+	ending.generate_ending();
 }
