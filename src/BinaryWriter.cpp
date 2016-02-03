@@ -42,7 +42,7 @@ BinaryWriter::~BinaryWriter()
 
 void BinaryWriter::write_zero()
 {
-	std::cerr << "ZERO\n";
+	//std::cerr << "ZERO\n";
 	// Flush the carry buffer without adding a carry
 	if(carry_buffer != 0) {
 		// Write prefix zero
@@ -60,7 +60,7 @@ void BinaryWriter::write_zero()
 
 void BinaryWriter::write_one()
 {
-	std::cerr << "ONE\n";
+	//std::cerr << "ONE\n";
 	if(carry_buffer == 0) {
 		immediate_one();
 	} else {
@@ -70,7 +70,7 @@ void BinaryWriter::write_one()
 
 void BinaryWriter::add_carry()
 {
-	std::cerr << "CARRY\n";
+	// std::cerr << "CARRY\n";
 	if(carry_buffer == 0) {
 		throw std::runtime_error("Nothing to add carry to.");
 	}
