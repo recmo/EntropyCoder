@@ -54,5 +54,5 @@ void EntropyWriter::write(const Interval& symbol)
 	}
 	
 	// Generate a new potential ending
-	ending.generate_ending();
+	ending.generate(current);
 }

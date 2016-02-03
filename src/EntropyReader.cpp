@@ -43,7 +43,10 @@ void EntropyReader::read(const Interval& symbol)
 		value <<= 1;
 		if(!br.eof()) {
 			value |= br.read_bit() ? 1 : 0;
+		} else {
+			++past_end;
+			assert(past_end < 100);
 		}
 	}
-	ending.generate_ending();
+	ending.generate(current);
 }
