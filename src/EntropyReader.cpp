@@ -17,10 +17,7 @@ EntropyReader::EntropyReader(std::istream& input)
 
 bool EntropyReader::eof() const
 {
-	if(br.eof() && value == 0) {
-		throw std::runtime_error("Invalid ending on input file.");
-	}
-	return br.eof() && value == current.ending();
+	return br.eof() && value == ending.end();
 }
 
 EntropyReader::uint64 EntropyReader::read() const
@@ -30,13 +27,23 @@ EntropyReader::uint64 EntropyReader::read() const
 
 void EntropyReader::read(const Interval& symbol)
 {
-	current.update(symbol);
+	ending.reserve_current();
+	bool carry = false;
+	current.update(symbol, &carry);
+	if(carry) {
+		ending.prune_carry();
+	}
+	ending.prune(current);
 	for(bool bit: current.normalize()) {
+		if(bit) {
+			ending.prune_one();
+		} else {
+			ending.prune_zero();
+		}
 		value <<= 1;
 		if(!br.eof()) {
 			value |= br.read_bit() ? 1 : 0;
-		} else {
-			++eof_count;
 		}
 	}
+	ending.generate_ending();
 }
