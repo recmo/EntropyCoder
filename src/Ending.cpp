@@ -31,12 +31,9 @@ std::ostream& operator<<(std::ostream& out, const std::vector<std::vector<bool>>
 	return out;
 }
 
-Ending::uint64 Ending::end(bool* const carry)
+Ending::uint64 Ending::end(bool* const carry) const
 {
-	if(ending.empty()) {
-		ending = next_available_ending();
-	}
-	
+	assert(!ending.empty());
 	if(carry != nullptr) {
 		*carry = ending.at(0);
 	}
@@ -51,9 +48,7 @@ Ending::uint64 Ending::end(bool* const carry)
 
 void Ending::reserve_current()
 {
-	if(ending.empty()) {
-		ending = next_available_ending();
-	}
+	assert(!ending.empty());
 	reserved_endings.push_back(ending);
 	ending.clear();
 }
@@ -90,7 +85,7 @@ void Ending::prune(const Interval& interval)
 
 void Ending::prune_carry()
 {
-	std::cerr << state << " Prune carry: " << reserved_endings << "\n";
+	// std::cerr << state << " Prune carry: " << reserved_endings << "\n";
 	if(state == s0p) {
 		state = s1n;
 		
@@ -130,12 +125,12 @@ void Ending::prune_carry()
 	} else {
 		throw std::logic_error("Can not add carry in current state.");
 	}
-	std::cerr << "= " << reserved_endings << "\n";
+	// std::cerr << "= " << reserved_endings << "\n";
 }
 
 void Ending::prune_zero()
 {
-	std::cerr << state << " Prune zero: " << reserved_endings << "\n";
+	// std::cerr << state << " Prune zero: " << reserved_endings << "\n";
 	if(state == s0p || state == s1p) {
 		state = s0p;
 		
@@ -175,12 +170,12 @@ void Ending::prune_zero()
 	} else {
 		throw std::logic_error("Invalid state.");
 	}
-	std::cerr << "= " << reserved_endings << "\n";
+	// std::cerr << "= " << reserved_endings << "\n";
 }
 
 void Ending::prune_one()
 {
-	std::cerr << state << " Prune one: " << reserved_endings << "\n";
+	// std::cerr << state << " Prune one: " << reserved_endings << "\n";
 	if(state == s0p) {
 		state = s1p;
 		
@@ -244,7 +239,14 @@ void Ending::prune_one()
 	} else {
 		throw std::logic_error("Invalid state.");
 	}
-	std::cerr << "= " << reserved_endings << "\n";
+	// std::cerr << "= " << reserved_endings << "\n";
+}
+
+void Ending::generate_ending()
+{
+	assert(ending.empty());
+	ending = next_available_ending();
+	assert(!ending.empty());
 }
 
 bool Ending::is_valid(const Ending::End& ending)
