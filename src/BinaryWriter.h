@@ -34,8 +34,19 @@ private:
 	
 	// We use an 8 bit output buffer.
 	uint8_t buffer = 0;
+	bool last_byte_zero = false;
 	std::size_t position = 0;
 	static constexpr std::size_t buffer_size = 8 * sizeof(buffer);
 	void immediate_zero();
 	void immediate_one();
+	
+	// We delay output of bytes 0x00 0x00 0x00… because
+	// we remove trailing zeros.
+	void write_byte(uint8_t byte);
+	uint zero_bytes = 0;
+	
+	// Finally, we delay output of 0x80 after a 0x00. We will
+	// drop the 0x80 if it is the final byte.
+	void write_byte2(uint8_t byte);
+	uint delay = 0;
 };

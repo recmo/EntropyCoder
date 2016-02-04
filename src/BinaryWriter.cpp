@@ -3,25 +3,6 @@
 
 constexpr bool print = false;
 
-/* Bijective encoding to finitely odd numbers:
-
- ↔ 1
-0100 0000 ↔ 01
-1100 0000 ↔ 11
-0010 0000 ↔ 001
-0110 0000 ↔ 011
-1010 0000 ↔ 101
-1110 0000 ↔ 111
-0001 0000 ↔ 0001
-          ⋮
-1111 1111 ↔ 1111 1111
-0000 0000 ↔ 0000 0000 1
-1000 0000 ↔ 0000 0001 1
-0000 0000 0000 0000 ↔ 0000 0010 1
-0000 0000 0000 0000 ↔ 0000 0010 1
-
-*/
-
 BinaryWriter::~BinaryWriter()
 {
 	// Flush carry buffer
@@ -31,15 +12,17 @@ BinaryWriter::~BinaryWriter()
 		
 		// Write the trailing ones
 		while(--carry_buffer) {
+			// Do not write a single trailing 1 after a series of zeros
+			if(last_byte_zero && carry_buffer == 1) {
+				return;
+			}
 			immediate_one();
 		}
 	}
 	
 	// Flush buffer
-	if(position != 0) {
-		buffer <<= (buffer_size - position);
-		out << buffer;
-	}
+	buffer <<= (buffer_size - position);
+	write_byte(buffer);
 }
 
 void BinaryWriter::write_zero()
@@ -92,30 +75,71 @@ void BinaryWriter::add_carry()
 
 void BinaryWriter::immediate_one()
 {
+	// Flush buffer when full
+	if(position == buffer_size) {
+		write_byte(buffer);
+		position = 0;
+		buffer = 0;
+	}
+	
 	assert(position < buffer_size);
 	buffer <<= 1;
 	buffer |= 1;
 	++position;
-	
-	// Flush buffer when full
-	if(position == buffer_size) {
-		out << buffer;
-		position = 0;
-		buffer = 0;
-	}
 }
 
 void BinaryWriter::immediate_zero()
 {
+	// Flush buffer when full
+	if(position == buffer_size) {
+		write_byte(buffer);
+		position = 0;
+		buffer = 0;
+	}
+	
 	assert(position < buffer_size);
 	buffer <<= 1;
 	buffer |= 0;
 	++position;
-	
-	// Flush buffer when full
-	if(position == buffer_size) {
-		out << buffer;
-		position = 0;
-		buffer = 0;
+}
+
+void BinaryWriter::write_byte(uint8_t byte)
+{
+	if(byte == 0x00) {
+		++zero_bytes;
+		return;
+	}
+	if(byte != 0x00) {
+		while(zero_bytes > 0) {
+			write_byte2(0x00);
+			--zero_bytes;
+		}
+	}
+	write_byte2(byte);
+}
+
+void BinaryWriter::write_byte2(uint8_t byte)
+{
+	if(delay == 0) {
+		if(byte == 0x00) {
+			out << byte;
+			delay = 1;
+		} else {
+			out << byte;
+			delay = 0;
+		}
+	} else if(delay == 1) {
+		if(byte == 0x00) {
+			out << byte;
+		} else if(byte == 0x80) {
+			delay = 2;
+		} else {
+			out << byte;
+			delay = 0;
+		}
+	} else if(delay == 2) {
+		out << '\x80';
+		out << byte;
+		delay = (byte == 0) ? 1 : 0;
 	}
 }
