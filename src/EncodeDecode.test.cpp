@@ -16,6 +16,7 @@ typedef std::vector<Input> Inputs;
 
 TEST(EncodeDecode)
 {
+	// return;
 	const Inputs inputs = generate_bitstrings(10);
 	std::stringstream buffer;
 	for(double p: probabilities) {
@@ -40,10 +41,12 @@ TEST(EncodeDecode)
 			// also provided by bits in the stream.
 			const double sizeOverhead = std::log2(inputs.size());
 			
-			//std::cerr << p;
-			//for(bool bit: input)
-			//	std::cerr << (bit ? " true" : " false");
-			//std::cerr << std::endl;
+			if(false) {
+				std::cerr << p;
+				for(bool bit: input)
+					std::cerr << (bit ? " true" : " false");
+				std::cerr << std::endl;
+			}
 			
 			// Encode
 			buffer = std::stringstream{};

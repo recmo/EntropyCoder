@@ -67,7 +67,12 @@ void EntropyReader::read(const Interval& symbol)
 			value |= br.read_bit() ? 1 : 0;
 		} else {
 			++past_end;
-			assert(past_end < 100);
+			
+			// TODO: what is the right limit here? 100 was not enough for a simple
+			// case like
+			// echo -e "true\nfalse\ntrue\ntrue" | ./EntropyCoder roundtrip -p 1e-15
+			// Why would a thousand be enough?
+			assert(past_end < 1000);
 		}
 	}
 	ending.generate(current);
