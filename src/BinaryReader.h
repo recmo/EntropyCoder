@@ -15,7 +15,7 @@ private:
 	std::istream& in;
 	
 	// We use an 8 bit input buffer.
-	uint8_t buffer = 0;
+	uint8_t buffer = 1;
 	uint8_t mask = 0;
 	static constexpr std::size_t buffer_size = 8 * sizeof(buffer);
 };
