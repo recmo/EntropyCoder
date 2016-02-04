@@ -210,8 +210,8 @@ void Ending::prune_one()
 				new_reserved_endings.push_back(end);
 				continue;
 			}
-			// Remove items with the second bit unset.
-			if(end.size() < 2 || end.at(1) == false) {
+			// Remove items with the first bit equal to second bit
+			if(end.size() < 2 || end.at(0) == end.at(1)) {
 				continue;
 			}
 			// Shift, but keep carry bits intact.
