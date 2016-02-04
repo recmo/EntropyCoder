@@ -4,11 +4,12 @@
 #include <iomanip>
 #include <algorithm>
 
+constexpr bool print = false;
+
 typedef std::uint64_t uint64;
 
 EntropyWriter::~EntropyWriter()
 {
-	// std::cerr << "Writing ending\n";
 	bool carry = false;
 	uint64 end = ending.end(&carry);
 	if(carry) {
@@ -26,6 +27,8 @@ EntropyWriter::~EntropyWriter()
 
 void EntropyWriter::write(const Interval& symbol)
 {
+	if(print) std::cerr << "WRITE " << current << " " << symbol << "\n";
+	
 	// We didn't use the ending, so we should reserve it.
 	ending.reserve_current();
 	

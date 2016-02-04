@@ -4,6 +4,8 @@
 #include <iostream>
 #include <iomanip>
 
+constexpr bool print = false;
+
 EntropyReader::EntropyReader(std::istream& input)
 : br(input)
 {
@@ -17,11 +19,31 @@ EntropyReader::EntropyReader(std::istream& input)
 
 bool EntropyReader::eof() const
 {
-	return br.eof() && value == ending.end();
+	if(!br.eof()) {
+		return false;
+	}
+	bool carry = false;
+	const uint64 end = ending.end(&carry);
+	if(print) std::cerr << "EOF? " << current << " ";
+	if(print) std::cerr << "0x" << std::setw(16) << std::setfill('0') << std::hex;
+	if(print) std::cerr << value << " ";
+	if(print) std::cerr << "0x" << std::setw(16) << std::setfill('0') << std::hex;
+	if(print) std::cerr << end << "\n";
+	return value == end;
+	if(carry && value >= current.base) {
+		return false;
+	}
+	return value == end;
 }
 
 EntropyReader::uint64 EntropyReader::read() const
 {
+	uint64 descaled = current.descale(value);
+	if(print) std::cerr << "READ " << current << " ";
+	if(print) std::cerr << "0x" << std::setw(16) << std::setfill('0') << std::hex;
+	if(print) std::cerr << value << " ";
+	if(print) std::cerr << "0x" << std::setw(16) << std::setfill('0') << std::hex;
+	if(print) std::cerr << descaled << "\n";
 	return current.descale(value);
 }
 
