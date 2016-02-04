@@ -13,8 +13,12 @@ std::ostream& operator<<(std::ostream& out, const Interval& interval)
 		out << "0x" << std::setw(16) << std::setfill('0') << std::hex;
 		out << interval.base;
 		out << ", ";
-		out << "0x" << std::setw(16) << std::setfill('0') << std::hex;
-		out << interval.base + interval.range + 1;
+		if(interval.base + interval.range + 1 == 0) {
+			out << "1x0000000000000000";
+		} else {
+			out << "0x" << std::setw(16) << std::setfill('0') << std::hex;
+			out << interval.base + interval.range + 1;
+		}
 		out << ")";
 		out << std::dec;
 	} else {

@@ -33,6 +33,8 @@ std::ostream& operator<<(std::ostream& out, const std::vector<std::vector<bool>>
 
 Ending::uint64 Ending::end(bool* const carry) const
 {
+	if(print) std::cerr << state << " Ending on: " << ending << "\n";
+	
 	assert(!ending.empty());
 	if(carry != nullptr) {
 		*carry = ending.at(0);
@@ -48,6 +50,7 @@ Ending::uint64 Ending::end(bool* const carry) const
 
 void Ending::reserve_current()
 {
+	if(print)  std::cerr << state << " Reserve: " << ending << "\n";
 	assert(!ending.empty());
 	reserved_endings.push_back(ending);
 	ending.clear();
@@ -263,10 +266,9 @@ bool Ending::is_reserved(const End& ending)
 
 void Ending::generate(const Interval& interval)
 {
+	if(print) std::cerr << state << " generate " << interval << " " << reserved_endings << "\n";
 	assert(ending.empty());
 	ending = std::vector<bool>{state == s1p};
-	
-	const bool print = false;
 	
 	if(print) std::cerr << "Next: " << ending;
 	if(print) std::cerr << (!is_valid(interval, ending) ? " invalid" : "");

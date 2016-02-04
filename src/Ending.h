@@ -13,7 +13,7 @@ public:
 	void prune_carry();
 	void prune_one();
 	void prune_zero();
-	void generate_ending(const Interval& interval);
+	void generate(const Interval& interval);
 	
 private:
 	enum State {
