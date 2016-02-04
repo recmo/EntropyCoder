@@ -247,6 +247,12 @@ bool Ending::is_valid(const Interval& interval, const Ending::End& end)
 	if(!interval.includes(value)) {
 		return false;
 	}
+	
+	// Remove endings that require carry but don't specify it or
+	// endings that specify carry but don't require it.
+	if((value < interval.base) != end.at(0)) {
+		return false;
+	}
 	return true;
 }
 
