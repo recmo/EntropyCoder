@@ -4,6 +4,7 @@
 #include <UnitTest++.h>
 #include <sstream>
 #include <cassert>
+#include <cmath>
 #include <vector>
 #include "Test.h"
 
@@ -15,7 +16,7 @@ typedef std::vector<Input> Inputs;
 
 TEST(EncodeDecode)
 {
-	const Inputs inputs = generate_bitstrings(5);
+	const Inputs inputs = generate_bitstrings(10);
 	std::stringstream buffer;
 	for(double p: probabilities) {
 		
@@ -26,17 +27,27 @@ TEST(EncodeDecode)
 			Interval::max - intervalTrue.range - 1
 		};
 		
+		// Entropy
+		const double trueBits = -std::log2(p);
+		const double falseBits = -std::log2(1.0-p);
+		double totalBits = 0.0;
+		
 		for(const Input& input: inputs) {
 			
-			std::cerr << p;
-			for(bool bit: input)
-				std::cerr << (bit ? " true" : " false");
-			std::cerr << std::endl;
+			// Calculate the exact overhead. This is due to having to encode the
+			// ending (which contains information on the number of symbols).
+			// TODO: The real upper bound is tighter because length information is
+			// also provided by bits in the stream.
+			const double sizeOverhead = std::log2(inputs.size());
 			
-			double entropy = 0.0;
+			//std::cerr << p;
+			//for(bool bit: input)
+			//	std::cerr << (bit ? " true" : " false");
+			//std::cerr << std::endl;
 			
 			// Encode
 			buffer = std::stringstream{};
+			totalBits = 0.0;
 			{
 				EntropyWriter ew(buffer);
 				for(bool bit: input) {
@@ -46,14 +57,19 @@ TEST(EncodeDecode)
 						ew.write(intervalTrue);
 					} else {
 						ew.write(bit ? intervalTrue : intervalFalse);
+						totalBits += bit ? trueBits : falseBits;
 					}
 				}
 			}
 			
+			// Check size
 			const uint64 size = buffer.str().size();
-			std::cerr << "size = " << size;
-			std::cerr << " " << entropy;
-			std::cerr <<  "\n"
+			const uint maxBytes = ceil((totalBits + sizeOverhead) / 8.0);
+			//std::cerr << "size = " << size;
+			//std::cerr << " " << totalBits;
+			//std::cerr << " " << maxBytes;
+			//std::cerr << "\n";
+			CHECK(size <= maxBytes);
 			
 			// Decode
 			buffer.seekg(0);
