@@ -16,6 +16,6 @@ private:
 	
 	// We use an 8 bit input buffer.
 	uint8_t buffer = 0;
-	std::size_t position = 0;
+	uint8_t mask = 0;
 	static constexpr std::size_t buffer_size = 8 * sizeof(buffer);
 };
