@@ -45,6 +45,12 @@ TEST(Simple)
 	CHECK_EQUAL("11111111", read("\xFF", 8));
 }
 
+TEST(AppendOne)
+{
+	CHECK_EQUAL("000000001", read(std::string{0x00}, 8));
+	CHECK_EQUAL("00100011000000001", read(std::string{0x23, 0x00}, 8));
+}
+
 TEST(MultiByte)
 {
 	CHECK_EQUAL("000000010010001101000001", read("\x01\x23\x41", 24));
