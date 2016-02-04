@@ -120,6 +120,57 @@ void decode(double probability, const std::string& positive, const std::string& 
 	}
 }
 
+void roundtrip(double probability, const std::string& positive, const std::string& negative)
+{
+	const Interval intervalTrue{probability};
+	const Interval intervalFalse{
+		intervalTrue.base + intervalTrue.range + 1,
+		Interval::max - intervalTrue.range - 1
+	};
+	std::cerr << "True = "  << intervalTrue << "\n";
+	std::cerr << "False = "  << intervalFalse << "\n";
+	
+	std::stringstream buffer;
+	std::vector<bool> input;
+	{
+		EntropyWriter ew(buffer);
+		while(std::cin.good() && !std::cin.eof()) {
+			std::string in;
+			std::cin >> in;
+			if(in.empty()) {
+				continue;
+			}
+			assert(in == positive || in == negative);
+			ew.write(in == positive ? intervalTrue : intervalFalse);
+			input.push_back(in == positive);
+		}
+	}
+	
+	std::cout << std::flush;
+	std::cerr << std::flush;
+	std::cerr << "----Reading back-----\n";
+	
+	buffer.seekg(0);
+	{
+		EntropyReader er(buffer);
+		for(bool bit: input) {
+			if(er.eof() == true) {
+				throw std::runtime_error("Premature EOF on reader");
+			}
+			const bool value = intervalTrue.includes(er.read());
+			if(bit != value) {
+				throw std::runtime_error("Bit read incorrectly");
+			}
+			er.read(bit ? intervalTrue : intervalFalse);
+			std::cerr << "Read: " << bit << "\n";
+		}
+		if(er.eof() == false) {
+			throw std::runtime_error("No EOF at end of data.");
+		}
+		std::cerr << "EOF\n";
+	}
+}
+
 int main(int argc, const char* argv[])
 {
 	try {
@@ -141,6 +192,9 @@ int main(int argc, const char* argv[])
 		}
 		if(args.at(1) == std::string{"decode"}) {
 			decode(probability, positive, negative);
+		}
+		if(args.at(1) == std::string{"roundtrip"}) {
+			roundtrip(probability, positive, negative);
 		}
 	}
 	catch(const std::exception& e) {
