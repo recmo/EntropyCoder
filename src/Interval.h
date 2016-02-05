@@ -21,18 +21,11 @@ public:
 	
 	bool operator==(const Interval& other) const;
 	bool operator!=(const Interval& other) const { return !(*this == other); }
-	bool is_normalized() const;
-	bool is_goofy() const;
 	double probability() const;
 	double entropy() const;
 	bool includes(uint64 value) const;
 	bool includes(const Interval& interval) const;
 	bool overlaps(const Interval& interval) const;
-	
-	uint64 descale(uint64 value) const;
-	
-	void update(const Interval& symbol, bool* carry = nullptr);
-	std::vector<bool> normalize();
 };
 
 std::ostream& operator<<(std::ostream& out, const Interval& interval);

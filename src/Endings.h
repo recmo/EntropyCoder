@@ -1,5 +1,5 @@
 #pragma once
-#include "Interval.h"
+#include "CodeInterval.h"
 #include <vector>
 
 class Endings {
@@ -9,11 +9,11 @@ public:
 	uint64 end(bool* const carry = nullptr) const;
 	
 	void reserve_current();
-	void prune(const Interval& interval);
+	void prune(const CodeInterval& interval);
 	void prune_carry();
 	void prune_one();
 	void prune_zero();
-	void generate(const Interval& interval);
+	void generate(const CodeInterval& interval);
 	
 private:
 	enum State {
@@ -27,6 +27,6 @@ private:
 	Set reserved_endings{};
 	End ending{false};
 	
-	bool is_valid(const Interval& interval, const End& ending);
+	bool is_valid(const CodeInterval& interval, const End& ending);
 	bool is_reserved(const End& ending);
 };

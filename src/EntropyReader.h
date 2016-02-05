@@ -1,7 +1,7 @@
 #pragma once
 #include <cstdint>
 #include "BinaryReader.h"
-#include "Interval.h"
+#include "CodeInterval.h"
 #include "Endings.h"
 
 class EntropyReader {
@@ -15,7 +15,7 @@ public:
 	
 private:
 	BinaryReader br;
-	Interval current;
+	CodeInterval current;
 	Interval::uint64 value;
 	Endings endings;
 	uint64 past_end = 0;

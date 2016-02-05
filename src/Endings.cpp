@@ -56,12 +56,11 @@ void Endings::reserve_current()
 	ending.clear();
 }
 
-void Endings::prune(const Interval& interval)
+void Endings::prune(const CodeInterval& interval)
 {
 	if(print) std::cerr << state << " prune " << interval << " " << reserved_endings << "\n";
 	Set new_reserved_endings;
 	for(const End& end: reserved_endings) {
-		
 		if(!is_valid(interval, end)) {
 			continue;
 		}
@@ -231,10 +230,10 @@ void Endings::prune_one()
 	if(print) std::cerr << "= " << reserved_endings << "\n";
 }
 
-bool Endings::is_valid(const Interval& interval, const Endings::End& end)
+bool Endings::is_valid(const CodeInterval& interval, const Endings::End& end)
 {
 	// Remove endings that require carry the interval excludes carry
-	if(end.at(0) == true && !interval.is_goofy()) {
+	if(end.at(0) == true && !interval.wraps()) {
 		return false;
 	}
 	
@@ -264,7 +263,7 @@ bool Endings::is_reserved(const End& ending)
 	return std::find(reserved_endings.begin(), reserved_endings.end(), ending) != reserved_endings.end();
 }
 
-void Endings::generate(const Interval& interval)
+void Endings::generate(const CodeInterval& interval)
 {
 	if(print) std::cerr << state << " generate " << interval << " " << reserved_endings << "\n";
 	assert(ending.empty());

@@ -1,5 +1,4 @@
 #include "Interval.h"
-#include "Utilities.h"
 #include <cmath>
 #include <cassert>
 #include <iostream>
@@ -8,29 +7,14 @@
 
 std::ostream& operator<<(std::ostream& out, const Interval& interval)
 {
-	if(!interval.is_goofy()) {
-		out << "[";
-		out << "0x" << std::setw(16) << std::setfill('0') << std::hex;
-		out << interval.base;
-		out << ", ";
-		if(interval.base + interval.range + 1 == 0) {
-			out << "1x0000000000000000";
-		} else {
-			out << "0x" << std::setw(16) << std::setfill('0') << std::hex;
-			out << interval.base + interval.range + 1;
-		}
-		out << ")";
-		out << std::dec;
-	} else {
-		out << " ";
-		out << "0x" << std::setw(16) << std::setfill('0') << std::hex;
-		out << (interval.base + interval.range + 1);
-		out << ")[";
-		out << "0x" << std::setw(16) << std::setfill('0') << std::hex;
-		out << interval.base;
-		out << " ";
-		out << std::dec;
-	}
+	const bool wraps = interval.base + interval.range + 1 <= interval.base;
+	out << "[";
+	out << "0." << std::setw(16) << std::setfill('0') << std::hex;
+	out << interval.base;
+	out << (wraps ? ", 1." : ", 0.");
+	out << std::setw(16) << std::setfill('0') << std::hex;
+	out << interval.base + interval.range + 1;
+	out << ")";
 	return out;
 }
 
@@ -86,22 +70,13 @@ double Interval::entropy() const
 	return -std::log2(probability());
 }
 
-bool Interval::is_normalized() const
-{
-	return range >= msb;
-}
-
-bool Interval::is_goofy() const
-{
-	return base + range < base;
-}
-
 bool Interval::includes(Interval::uint64 value) const
 {
-	if(!is_goofy()) {
-		return value >= base && (value - base == 0 || value - base - 1 < range);
+	uint64 top = base + range + 1;
+	if(top <= base) {
+		return value >= base || value < top;
 	} else {
-		return value >= base || value < base + range + 1;
+		return value >= base && value < top;
 	}
 }
 
@@ -113,76 +88,4 @@ bool Interval::includes(const Interval& interval) const
 bool Interval::overlaps(const Interval& interval) const
 {
 	return includes(interval.base) && !includes(interval);
-}
-
-Interval::uint64 Interval::descale(Interval::uint64 value) const
-{
-	if(!includes(value)) {
-		throw std::range_error("Value not in interval.");
-	}
-	
-	// value = (value - base) · 2⁶⁴ / (range + 1)
-	if(range == max) {
-		return value - base;
-	} else {
-		assert(value - base < range + 1);
-		std::uint64_t q, r;
-		std::tie(q, r) = div128(value - base, 0, range + 1);
-		q += (r >= msb) ? 1 : 0;
-		return q;
-	}
-}
-
-void Interval::update(const Interval& symbol, bool* carry)
-{
-	// Check if we are normalized
-	if(range < msb) {
-		throw std::range_error("Interval must be normalized before update.");
-	}
-	
-	// Check the incoming range:
-	if(symbol.range == 0 || symbol.base + symbol.range < symbol.base) {
-		throw std::range_error("Invalid symbol interval.");
-	}
-	
-	// Calculate the new base
-	uint64 h, l;
-	std::tie(h, l) = mul128(symbol.base, range);
-	std::tie(h, l) = add128(h, l, symbol.base);
-	const uint64 t = h + (l > 0 ? 1 : 0);
-	base += t;
-	
-	// Detect carry
-	if(carry != nullptr) {
-		*carry = base < t;
-	}
-	
-	// Calculate the new range
-	std::tie(h, l) = mul128(symbol.base + symbol.range, range);
-	std::tie(h, l) = add128(h, l, symbol.base + symbol.range);
-	std::tie(h, l) = add128(h, l, range);
-	std::tie(h, l) = add128(h, l, 1);
-	range = h - t - 1;
-}
-
-std::vector<bool> Interval::normalize()
-{
-	std::vector<bool> result;
-	
-	// Calculate number of bits to shift out
-	const uint n = range == 0 ? 63 : count_leading_zeros(range);
-	result.reserve(n);
-	
-	// Shift out bits
-	while(range < msb) {
-		const bool bit = base >= msb;
-		result.push_back(bit);
-		base <<= 1;
-		range <<= 1;
-		range |= 1;
-	}
-	
-	// Check our state
-	assert(range >= msb);
-	return result;
 }

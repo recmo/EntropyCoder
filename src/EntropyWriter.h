@@ -1,7 +1,7 @@
 #pragma once
 #include <cstdint>
 #include "BinaryWriter.h"
-#include "Interval.h"
+#include "CodeInterval.h"
 #include "Endings.h"
 
 class EntropyWriter {
@@ -13,6 +13,6 @@ public:
 	
 private:
 	BinaryWriter bw;
-	Interval current;
+	CodeInterval current;
 	Endings endings;
 };

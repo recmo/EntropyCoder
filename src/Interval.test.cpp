@@ -6,14 +6,6 @@
 
 SUITE(Interval) {
 
-Interval make_goofy(Interval::uint64 base, Interval::uint64 range)
-{
-	Interval i;
-	i.base = base;
-	i.range = range;
-	return i;
-}
-
 const Interval smallest{0x0000000000000000UL, 0x0000000000000001UL};
 const Interval largest{0x0000000000000000UL, 0xFFFFFFFFFFFFFFFFUL};
 const Interval half1{0x0000000000000000UL, 0x7FFFFFFFFFFFFFFFUL};
@@ -21,8 +13,6 @@ const Interval half2{0x8000000000000000UL, 0x7FFFFFFFFFFFFFFFUL};
 
 const Interval min_norm1{0x0000000000000000UL, 0x8000000000000000UL};
 const Interval min_norm2{0x7FFFFFFFFFFFFFFFUL, 0x8000000000000000UL};
-const Interval min_goofy = make_goofy(0x8000000000000000UL, 0x8000000000000000UL);
-const Interval max_goofy = make_goofy(0xFFFFFFFFFFFFFFFFUL, 0xFFFFFFFFFFFFFFFFUL);
 
 TEST(LiteralRanges)
 {
@@ -45,27 +35,6 @@ TEST(Equality)
 			CHECK_EQUAL(i != j , intervals[i] != intervals[j]);
 		}
 	}
-}
-
-TEST(IsNormalized)
-{
-	CHECK_EQUAL(true, largest.is_normalized());
-	CHECK_EQUAL(true, min_norm1.is_normalized());
-	CHECK_EQUAL(true, min_norm2.is_normalized());
-	CHECK_EQUAL(true, min_goofy.is_normalized());
-	CHECK_EQUAL(true, max_goofy.is_normalized());
-	CHECK_EQUAL(false, smallest.is_normalized());
-	CHECK_EQUAL(false, half1.is_normalized());
-	CHECK_EQUAL(false, half2.is_normalized());
-}
-
-TEST(IsGoofy)
-{
-	CHECK_EQUAL(false, largest.is_goofy());
-	CHECK_EQUAL(false, min_norm1.is_goofy());
-	CHECK_EQUAL(false, min_norm2.is_goofy());
-	CHECK_EQUAL(true, min_goofy.is_goofy());
-	CHECK_EQUAL(true, max_goofy.is_goofy());
 }
 
 TEST(Inclusion)
@@ -137,56 +106,6 @@ TEST(IllegalProbability)
 	CHECK_THROW(Interval{-std::numeric_limits<double>().infinity()}, std::range_error);
 	CHECK_THROW(Interval{std::numeric_limits<double>().quiet_NaN()}, std::range_error);
 	CHECK_THROW(Interval{std::numeric_limits<double>().signaling_NaN()}, std::range_error);
-}
-
-TEST(UpdateLargest)
-{
-	const std::vector<Interval> symbols{
-		largest, smallest, half1, half2, min_norm1, min_norm2
-	};
-	for(const Interval& symbol: symbols) {
-		Interval updated = largest;
-		bool carry;
-		updated.update(symbol, &carry);
-		CHECK(!carry);
-		CHECK_EQUAL(symbol, updated);
-	}
-}
-
-TEST(Update)
-{
-	const std::vector<Interval> intervals {
-		largest, min_norm1, min_norm2, min_goofy, max_goofy
-	};
-	const std::vector<Interval> symbols {
-		largest, smallest, half1, half2, min_norm1, min_norm2
-	};
-	for(const Interval& interval: intervals) {
-		for(const Interval& symbol: symbols) {
-			Interval updated = interval;
-			bool carry;
-			updated.update(symbol, &carry);
-			if(!interval.is_goofy()) {
-				CHECK(!carry);
-				CHECK(!updated.is_goofy());
-				CHECK(interval.includes(updated));
-			}
-		}
-	}
-}
-
-TEST(UpdateCarry)
-{
-	const std::vector<Interval> symbols {
-		half2, min_norm2
-	};
-	for(const Interval& symbol: symbols) {
-		Interval updated = max_goofy;
-		bool carry;
-		updated.update(symbol, &carry);
-		CHECK_EQUAL(true, carry);
-		CHECK_EQUAL(false, updated.is_goofy());
-	}
 }
 
 }
