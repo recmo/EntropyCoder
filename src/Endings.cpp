@@ -1,4 +1,4 @@
-#include "Ending.h"
+#include "Endings.h"
 #include <stdexcept>
 
 constexpr bool print = false;
@@ -31,7 +31,7 @@ std::ostream& operator<<(std::ostream& out, const std::vector<std::vector<bool>>
 	return out;
 }
 
-Ending::uint64 Ending::end(bool* const carry) const
+Endings::uint64 Endings::end(bool* const carry) const
 {
 	if(print) std::cerr << state << " Ending on: " << ending << "\n";
 	
@@ -48,7 +48,7 @@ Ending::uint64 Ending::end(bool* const carry) const
 	return end;
 }
 
-void Ending::reserve_current()
+void Endings::reserve_current()
 {
 	if(print)  std::cerr << state << " Reserve: " << ending << "\n";
 	assert(!ending.empty());
@@ -56,7 +56,7 @@ void Ending::reserve_current()
 	ending.clear();
 }
 
-void Ending::prune(const Interval& interval)
+void Endings::prune(const Interval& interval)
 {
 	if(print) std::cerr << state << " prune " << interval << " " << reserved_endings << "\n";
 	Set new_reserved_endings;
@@ -72,7 +72,7 @@ void Ending::prune(const Interval& interval)
 	if(print) std::cerr << " = " << reserved_endings << "\n";
 }
 
-void Ending::prune_carry()
+void Endings::prune_carry()
 {
 	if(print)  std::cerr << state << " Prune carry: " << reserved_endings << "\n";
 	if(state == s0p) {
@@ -117,7 +117,7 @@ void Ending::prune_carry()
 	if(print)  std::cerr << "= " << reserved_endings << "\n";
 }
 
-void Ending::prune_zero()
+void Endings::prune_zero()
 {
 	if(print)  std::cerr << state << " Prune zero: " << reserved_endings << "\n";
 	if(state == s0p || state == s1p) {
@@ -162,7 +162,7 @@ void Ending::prune_zero()
 	if(print)  std::cerr << "= " << reserved_endings << "\n";
 }
 
-void Ending::prune_one()
+void Endings::prune_one()
 {
 	if(print) std::cerr << state << " Prune one: " << reserved_endings << "\n";
 	if(state == s0p) {
@@ -231,7 +231,7 @@ void Ending::prune_one()
 	if(print) std::cerr << "= " << reserved_endings << "\n";
 }
 
-bool Ending::is_valid(const Interval& interval, const Ending::End& end)
+bool Endings::is_valid(const Interval& interval, const Endings::End& end)
 {
 	// Remove endings that require carry the interval excludes carry
 	if(end.at(0) == true && !interval.is_goofy()) {
@@ -259,12 +259,12 @@ bool Ending::is_valid(const Interval& interval, const Ending::End& end)
 	return true;
 }
 
-bool Ending::is_reserved(const End& ending)
+bool Endings::is_reserved(const End& ending)
 {
 	return std::find(reserved_endings.begin(), reserved_endings.end(), ending) != reserved_endings.end();
 }
 
-void Ending::generate(const Interval& interval)
+void Endings::generate(const Interval& interval)
 {
 	if(print) std::cerr << state << " generate " << interval << " " << reserved_endings << "\n";
 	assert(ending.empty());

@@ -11,7 +11,7 @@ typedef std::uint64_t uint64;
 EntropyWriter::~EntropyWriter()
 {
 	bool carry = false;
-	uint64 end = ending.end(&carry);
+	uint64 end = endings.end(&carry);
 	if(carry) {
 		bw.add_carry();
 	}
@@ -30,7 +30,7 @@ void EntropyWriter::write(const Interval& symbol)
 	if(print) std::cerr << "WRITE " << current << " " << symbol << "\n";
 	
 	// We didn't use the ending, so we should reserve it.
-	ending.reserve_current();
+	endings.reserve_current();
 	
 	// Update interval
 	bool carry;
@@ -39,23 +39,23 @@ void EntropyWriter::write(const Interval& symbol)
 	// Apply carry
 	if(carry) {
 		bw.add_carry();
-		ending.prune_carry();
+		endings.prune_carry();
 	}
 	
 	// Remove endings that are now out of the interval
-	ending.prune(current);
+	endings.prune(current);
 	
 	// Shift out bits
 	for(bool bit: current.normalize()) {
 		if(bit) {
 			bw.write_one();
-			ending.prune_one();
+			endings.prune_one();
 		} else {
 			bw.write_zero();
-			ending.prune_zero();
+			endings.prune_zero();
 		}
 	}
 	
 	// Generate a new potential ending
-	ending.generate(current);
+	endings.generate(current);
 }

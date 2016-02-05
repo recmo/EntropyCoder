@@ -2,7 +2,7 @@
 #include <cstdint>
 #include "BinaryWriter.h"
 #include "Interval.h"
-#include "Ending.h"
+#include "Endings.h"
 
 class EntropyWriter {
 public:
@@ -14,5 +14,5 @@ public:
 private:
 	BinaryWriter bw;
 	Interval current;
-	Ending ending;
+	Endings endings;
 };

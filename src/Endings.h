@@ -2,7 +2,7 @@
 #include "Interval.h"
 #include <vector>
 
-class Ending {
+class Endings {
 public:
 	typedef Interval::uint64 uint64;
 	
@@ -27,10 +27,6 @@ private:
 	Set reserved_endings{};
 	End ending{false};
 	
-	void remove_endings_out_of_interval();
-	void remove_endings_without_carry();
-	void shift_endings_with_zero();
-	void shift_endings_with_one();
 	bool is_valid(const Interval& interval, const End& ending);
 	bool is_reserved(const End& ending);
 };

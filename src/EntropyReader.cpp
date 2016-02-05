@@ -23,7 +23,7 @@ bool EntropyReader::eof() const
 		return false;
 	}
 	bool carry = false;
-	const uint64 end = ending.end(&carry);
+	const uint64 end = endings.end(&carry);
 	if(print) std::cerr << "EOF? " << current << " ";
 	if(print) std::cerr << "0x" << std::setw(16) << std::setfill('0') << std::hex;
 	if(print) std::cerr << value << " ";
@@ -49,18 +49,18 @@ EntropyReader::uint64 EntropyReader::read() const
 
 void EntropyReader::read(const Interval& symbol)
 {
-	ending.reserve_current();
+	endings.reserve_current();
 	bool carry = false;
 	current.update(symbol, &carry);
 	if(carry) {
-		ending.prune_carry();
+		endings.prune_carry();
 	}
-	ending.prune(current);
+	endings.prune(current);
 	for(bool bit: current.normalize()) {
 		if(bit) {
-			ending.prune_one();
+			endings.prune_one();
 		} else {
-			ending.prune_zero();
+			endings.prune_zero();
 		}
 		value <<= 1;
 		if(!br.eof()) {
@@ -75,5 +75,5 @@ void EntropyReader::read(const Interval& symbol)
 			assert(past_end < 1000);
 		}
 	}
-	ending.generate(current);
+	endings.generate(current);
 }
