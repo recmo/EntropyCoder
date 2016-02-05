@@ -30,7 +30,6 @@ public:
 	bool overlaps(const Interval& interval) const;
 	
 	uint64 descale(uint64 value) const;
-	uint64 ending(bool* carry = nullptr) const;
 	
 	void update(const Interval& symbol, bool* carry = nullptr);
 	std::vector<bool> normalize();

@@ -133,34 +133,6 @@ Interval::uint64 Interval::descale(Interval::uint64 value) const
 	}
 }
 
-Interval::uint64 Interval::ending(bool* carry) const
-{
-	// Q: Is it possible that value == end11 but actually there is one more bit
-	//    of symbols and then the end will be end1?
-	static constexpr uint64 end1 = (1UL << 63);
-	static constexpr uint64 end01 = (1UL << 62);
-	static constexpr uint64 end11 = end1 | end01;
-	if(includes(end1)) {
-		// End in 0.1 or 1.1
-		if(carry != nullptr) {
-			*carry = base > end1;
-		}
-		return end1;
-	}
-	if(includes(end01)) {
-		// End in 0.01 or 1.01
-		if(carry != nullptr) {
-			*carry = base > end1;
-		}
-		return end01;
-	}
-	assert(includes(end11));
-	if(carry != nullptr) {
-		*carry = base > end11;
-	}
-	return end11;
-}
-
 void Interval::update(const Interval& symbol, bool* carry)
 {
 	// Check if we are normalized
