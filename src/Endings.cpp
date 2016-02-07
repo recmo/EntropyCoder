@@ -267,51 +267,89 @@ void Endings::generate(const CodeInterval& interval)
 {
 	if(print) std::cerr << state << " generate " << interval << " " << reserved_endings << "\n";
 	assert(ending.empty());
-	ending = std::vector<bool>{state == s1p};
 	
-	if(print) std::cerr << "Next: " << ending;
-	if(print) std::cerr << (!is_valid(interval, ending) ? " invalid" : "");
-	if(print) std::cerr << (is_reserved(ending) ? " reserved" : "");
-	if(!is_reserved(ending) && is_valid(interval, ending)) {
-		if(print) std::cerr << " available!\n";
-		return;
+	
+	End test = first();
+	if(!reserved_endings.empty()) {
+		test = next(reserved_endings.back());
 	}
-	if(print) std::cerr << "\n";
-	
-	if(state != s1n) {
-		ending[0] = !ending[0];
-		if(print) std::cerr << "Next: " << ending;
-		if(print) std::cerr << (!is_valid(interval, ending) ? " invalid" : "");
-		if(print) std::cerr << (is_reserved(ending) ? " reserved" : "");
-		if(!is_reserved(ending) && is_valid(interval, ending)) {
-			if(print) std::cerr << " available!\n";
-			return;
-		}
-		if(print) std::cerr << "\n";
+	while(!is_valid(interval, test)) {
+		test = next(test);
 	}
 	
-	ending = std::vector<bool>{false, true};
+	ending = first();
 	if(print) std::cerr << "Next: " << ending;
 	if(print) std::cerr << (!is_valid(interval, ending) ? " invalid" : "");
 	if(print) std::cerr << (is_reserved(ending) ? " reserved" : "");
 	while(is_reserved(ending) || !is_valid(interval, ending)) {
+		ending = next(ending);
 		if(print) std::cerr << "\n";
-		bool carry = true;
-		int n = ending.size() - 2;
-		while(carry && n >= 0) {
-			carry = ending.at(n);
-			ending.at(n) = !ending.at(n);
-			--n;
-		}
-		if(carry) {
-			for(auto bit: ending) {
-				bit = false;
-			}
-			ending.push_back(true);
-		}
 		if(print) std::cerr << "Next: " << ending;
 		if(print) std::cerr << (!is_valid(interval, ending) ? " invalid" : "");
 		if(print) std::cerr << (is_reserved(ending) ? " reserved" : "");
 	}
 	if(print) std::cerr << " available!\n";
+	// std::cerr << ending << "\t" << test << "\t" << reserved_endings << "\n";
+	assert(ending == test);
+}
+
+Endings::End Endings::first()
+{
+	if(state == s0p || state == s1n) {
+		return End{false};
+	} else if(state == s1p) {
+		return End{true};
+	} else {
+		throw std::logic_error("Invalid state.");
+	}
+}
+
+Endings::End Endings::next(End current)
+{
+	if(state == s0p) {
+		if(current == End{false}) {
+			return End{true};
+		} else {
+			return next(current, 0);
+		}
+	} else if(state == s1n) {
+		if(current == End{false}) {
+			return End{false, true};
+		} else {
+			return next(current, 1);
+		}
+	} else if(state == s1p) {
+		if(current == End{true}) {
+			return End{false};
+		} else if(current == End{false}) {
+			return End{false, true};
+		} else {
+			return next(current, 0);
+		}
+	} else {
+		throw std::logic_error("Invalid state.");
+	}
+}
+
+Endings::End Endings::next(End current, int msb)
+{
+	const uint length = current.size();
+	
+	// Propagate carry from penultimate digit to front
+	bool carry = true;
+	int n = length - 2;
+	while(carry && n >= msb) {
+		carry = current.at(n);
+		current.at(n) = !current.at(n);
+		--n;
+	}
+	
+	// If we are left with a carry, extend
+	if(carry) {
+		for(auto bit: current) {
+			bit = false;
+		}
+		current.push_back(true);
+	}
+	return current;
 }

@@ -29,4 +29,8 @@ private:
 	
 	bool is_valid(const CodeInterval& interval, const End& ending);
 	bool is_reserved(const End& ending);
+	
+	End first();
+	End next(End current);
+	End next(End current, int msb);
 };
