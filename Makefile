@@ -57,7 +57,7 @@ build/%.d: src/%.cpp
 
 build/precompiled.h:
 	@echo "Inc   " precompiled.h
-	@grep -h "#include <" $(sources) $(headers) | sort | uniq > $@
+	@grep -h "#include <" $(filter-out src/test.cpp $(filter %.test.cpp,$(sources) $(headers)),$(sources) $(headers)) | sort | uniq > $@
 
 build/%.pch: build/%.h
 	@echo "Pch   " $*.h
