@@ -90,7 +90,7 @@ void Endings::prune_carry()
 		reserved_endings = new_reserved_endings;
 		
 	} else if(state == s1p) {
-		state = s1p;
+		state = s0p;
 		
 		Set new_reserved_endings;
 		for(End end: reserved_endings) {
