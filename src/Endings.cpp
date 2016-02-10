@@ -100,6 +100,12 @@ void Endings::prune_carry()
 				new_reserved_endings.push_back(end);
 				continue;
 			}
+			// Keep 0. as 1.
+			if(end == End{false}) {
+				end = End{true};
+				new_reserved_endings.push_back(end);
+				continue;
+			}
 			// Remove the items with the carry bit unset
 			if(end.at(0) == false) {
 				continue;
