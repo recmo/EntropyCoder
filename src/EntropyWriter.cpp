@@ -10,11 +10,10 @@ typedef std::uint64_t uint64;
 
 EntropyWriter::~EntropyWriter()
 {
-	const bool carry = end.ending & End::msb;
-	uint64 value = end.ending << 1;
-	if(carry) {
+	if(end.carry_bit()) {
 		bw.add_carry();
 	}
+	uint64 value = end.value_bits();
 	while(value != 0) {
 		if(value & Interval::msb) {
 			bw.write_one();

@@ -2,11 +2,6 @@
 #include "CodeInterval.h"
 #include <stdexcept>
 
-End::End()
-: End{sS}
-{
-}
-
 End::End(End::State _state)
 : state{_state}
 {

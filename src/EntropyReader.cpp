@@ -22,18 +22,7 @@ bool EntropyReader::eof() const
 	if(!br.eof()) {
 		return false;
 	}
-	const bool carry = end.ending & End::msb;
-	const uint64 end_value = end.ending << 1;
-	if(print) std::cerr << "EOF? " << current << " ";
-	if(print) std::cerr << "0x" << std::setw(16) << std::setfill('0') << std::hex;
-	if(print) std::cerr << value << " ";
-	if(print) std::cerr << "0x" << std::setw(16) << std::setfill('0') << std::hex;
-	if(print) std::cerr << end_value << "\n";
-	return value == end_value;
-	if(carry && value >= current.base) {
-		return false;
-	}
-	return value == end_value;
+	return value == end.value_bits();
 }
 
 EntropyReader::uint64 EntropyReader::read() const

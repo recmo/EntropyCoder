@@ -14,12 +14,15 @@ public:
 	static constexpr std::uint64_t msb = 1UL << 63;
 	std::uint64_t ending = 0;
 	
-	End();
+	explicit End(): End{sS} {}
 	explicit End(State state);
-	End(State state, std::uint64_t ending);
+	explicit End(State state, std::uint64_t ending);
 	
 	bool operator==(const End& other) const;
 	bool operator!=(const End& other) const { return !(*this == other); }
+	
+	bool carry_bit() const { return ending & msb; }
+	std::uint64_t value_bits() const { return ending << 1; }
 	
 	void first(const CodeInterval& interval);
 	void next();
