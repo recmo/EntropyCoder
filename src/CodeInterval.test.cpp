@@ -52,8 +52,7 @@ TEST(UpdateLargest)
 	};
 	for(const CodeInterval& symbol: symbols) {
 		CodeInterval updated = largest;
-		bool carry;
-		updated.update(symbol, &carry);
+		const bool carry = updated.update(symbol);
 		CHECK(!carry);
 		CHECK_EQUAL(symbol, updated);
 	}
@@ -70,8 +69,7 @@ TEST(Update)
 	for(const CodeInterval& interval: intervals) {
 		for(const CodeInterval& symbol: symbols) {
 			CodeInterval updated = interval;
-			bool carry;
-			updated.update(symbol, &carry);
+			const bool carry = updated.update(symbol);
 			if(!interval.wraps()) {
 				CHECK(!carry);
 				CHECK(!updated.wraps());
@@ -88,8 +86,7 @@ TEST(UpdateCarry)
 	};
 	for(const CodeInterval& symbol: symbols) {
 		CodeInterval updated = max_wrap;
-		bool carry;
-		updated.update(symbol, &carry);
+		const bool carry = updated.update(symbol);
 		CHECK_EQUAL(true, carry);
 		CHECK_EQUAL(false, updated.wraps());
 	}

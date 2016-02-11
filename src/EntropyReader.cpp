@@ -50,9 +50,7 @@ EntropyReader::uint64 EntropyReader::read() const
 void EntropyReader::read(const Interval& symbol)
 {
 	end.next();
-	bool carry = false;
-	current.update(symbol, &carry);
-	if(carry) {
+	if(current.update(symbol)) {
 		end.carry();
 	}
 	for(bool bit: current.normalize()) {

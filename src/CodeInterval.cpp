@@ -29,7 +29,7 @@ Interval::uint64 CodeInterval::descale(Interval::uint64 value) const
 	}
 }
 
-void CodeInterval::update(const Interval& symbol, bool* carry)
+bool CodeInterval::update(const Interval& symbol)
 {
 	// Check if we are normalized
 	if(range < msb) {
@@ -48,17 +48,15 @@ void CodeInterval::update(const Interval& symbol, bool* carry)
 	const uint64 t = h + (l > 0 ? 1 : 0);
 	base += t;
 	
-	// Detect carry
-	if(carry != nullptr) {
-		*carry = base < t;
-	}
-	
 	// Calculate the new range
 	std::tie(h, l) = mul128(symbol.base + symbol.range, range);
 	std::tie(h, l) = add128(h, l, symbol.base + symbol.range);
 	std::tie(h, l) = add128(h, l, range);
 	std::tie(h, l) = add128(h, l, 1);
 	range = h - t - 1;
+	
+	// Return carry
+	return base < t;
 }
 
 std::vector<bool> CodeInterval::normalize()

@@ -32,12 +32,8 @@ void EntropyWriter::write(const Interval& symbol)
 	// We didn't use the ending, so we should reserve it.
 	end.next();
 	
-	// Update interval
-	bool carry;
-	current.update(symbol, &carry);
-	
-	// Apply carry
-	if(carry) {
+	// Update interval and add carry
+	if(current.update(symbol)) {
 		bw.add_carry();
 		end.carry();
 	}

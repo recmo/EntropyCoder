@@ -7,6 +7,8 @@ public:
 	bool is_normalized() const;
 	bool wraps() const;
 	uint64 descale(uint64 value) const;
-	void update(const Interval& symbol, bool* carry = nullptr);
+	
+	/// @returns true on carry
+	bool update(const Interval& symbol);
 	std::vector<bool> normalize();
 };
