@@ -11,14 +11,17 @@ resources := $(shell find -wholename './src/*.qrc')
 sanitizers :=
 
 # C++14 Compiler
-CXX := clang++-3.8
 flags := -std=c++14 -O3 -fPIC -g -Isrc
 flags += -Wall -Wextra -Wno-unused-parameter -Werror=return-type
-flags += -Werror=switch -Wdocumentation
+flags += -Werror=switch
 flags += -ftemplate-backtrace-limit=0
 flags += $(if ${packages}, $(shell pkg-config --cflags ${packages}))
 defines := -DPROGRAM=\"$(program)\" -DVERSION=\"$(version)\"
-precompiled := -include-pch build/precompiled.pch
+ifeq ($(findstring clang,$(CXX)),clang)
+precompiled := -include-pch build/precompiled.h.gch
+else
+precompiled := -include build/precompiled.h
+endif
 lto := -flto
 
 # Package config flags
@@ -59,12 +62,12 @@ build/precompiled.h:
 	@echo "Inc   " precompiled.h
 	@grep -h "#include <" $(filter-out src/test.cpp $(filter %.test.cpp,$(sources) $(headers)),$(sources) $(headers)) | sort | uniq > $@
 
-build/%.pch: build/%.h
+build/%.h.gch: build/%.h
 	@echo "Pch   " $*.h
 	@mkdir -p $(dir $@)
 	@$(precompile) -x c++-header $< -o $@
 
-build/%.o: src/%.cpp build/precompiled.pch
+build/%.o: src/%.cpp build/precompiled.h.gch
 	@echo "C++   " $*.cpp
 	@mkdir -p $(dir $@)
 	@$(compile) -c $< -o $@
