@@ -92,22 +92,10 @@ void Endings::prune_carry()
 		reserved_endings = new_reserved_endings;
 		
 	} else if(state == s1p) {
-		state = s0p;
+		state = s1n;
 		
 		Set new_reserved_endings;
 		for(End end: reserved_endings) {
-			// Keep 1. as 0.
-			if(end == End{true}) {
-				end = End{false};
-				new_reserved_endings.push_back(end);
-				continue;
-			}
-			// Keep 0. as 1.
-			if(end == End{false}) {
-				end = End{true};
-				new_reserved_endings.push_back(end);
-				continue;
-			}
 			// Remove the items with the carry bit unset
 			if(end.at(0) == false) {
 				continue;
