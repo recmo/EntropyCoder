@@ -196,10 +196,6 @@ int main(int argc, const char* argv[])
 		if(args.at(1) == std::string{"roundtrip"}) {
 			roundtrip(probability, positive, negative);
 		}
-		if(args.at(1) == std::string{"experiment"}) {
-			Endings e;
-			e.experiment();
-		}
 	}
 	catch(const std::exception& e) {
 		std::cerr << e.what() << std::endl;
