@@ -45,8 +45,7 @@ private:
 	void write_byte(uint8_t byte);
 	uint zero_bytes = 0;
 	
-	// Finally, we delay output of 0x80 after a 0x00. We will
-	// drop the 0x80 if it is the final byte.
+	// We drop the last 0x80 if the output ends in 0x00 0x80+
 	void write_byte2(uint8_t byte);
 	uint delay = 0;
 };

@@ -74,7 +74,9 @@ TEST(ZeroByte)
 	CHECK_EQUAL("00", write("0000 0000 1"));
 	CHECK_EQUAL("0000", write("0000 0000 0000 0000 1"));
 	CHECK_EQUAL("1000", write("0000 1111 1111 1111 c 1"));
-	CHECK_EQUAL("008080", write("0000 0000 1000 0000 1"));
+	CHECK_EQUAL("0080", write("0000 0000 1000 0000 1"));
+	CHECK_EQUAL("008080", write("0000 0000 1000 0000 1000 0000 1"));
+	CHECK_EQUAL("00808080", write("0000 0000 1000 0000 1000 0000 1000 0000 1"));
 }
 
 TEST(MultiByte)
@@ -98,6 +100,51 @@ TEST(CheckCarryThrow)
 	CHECK_THROW(write("1 c"), std::runtime_error);
 	CHECK_THROW(write("1111 1111 1111 1111 c"), std::runtime_error);
 	CHECK_THROW(write("0111 1111 1111 1111 c c"), std::runtime_error);
+}
+
+TEST(Bijective)
+{
+	const std::uint64_t max = 256 * 256 + 256 + 1;
+	std::vector<bool> results(max, false);
+	for(std::uint64_t n = 0; n < max; ++n) {
+		
+		// Write
+		std::ostringstream out;
+		{
+			BinaryWriter bw(out);
+			for(std::uint64_t b = 1; b < max; b <<= 1) {
+				if(b & n) {
+					bw.write_one();
+				} else {
+					bw.write_zero();
+				}
+			}
+		}
+		out.flush();
+		const std::string outs = out.str();
+		
+		CHECK(outs.size() <= 2);
+		
+		uint index = 0;
+		if(outs.size() == 0) {
+			index = 0;
+		} else if(outs.size() == 1) {
+			const std::uint8_t a = outs[0];
+			index = a + 1;
+		} else {
+			const std::uint8_t a = outs[0];
+			const std::uint8_t b = outs[1];
+			index = a * 256 + b + 256 + 1;
+		}
+		CHECK(index < results.size());
+		CHECK_EQUAL(false, results.at(index));
+		results.at(index) = true;
+	}
+	
+	// We must have seen all results
+	for(bool result: results) {
+		CHECK_EQUAL(true, result);
+	}
 }
 
 }

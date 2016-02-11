@@ -20,9 +20,19 @@ BinaryWriter::~BinaryWriter()
 		}
 	}
 	
-	// Flush buffer
+	// Flush bit buffer
 	buffer <<= (buffer_size - position);
 	write_byte(buffer);
+	
+	// Flush byte buffer, dropping the last value
+	assert(delay != 1); // We can not end on a trailing zero
+	if(delay > 1) {
+		--delay;
+		out << '\x00';
+		while(--delay) {
+			out << '\x80';
+		}
+	}
 }
 
 void BinaryWriter::write_zero()
@@ -120,26 +130,23 @@ void BinaryWriter::write_byte(uint8_t byte)
 
 void BinaryWriter::write_byte2(uint8_t byte)
 {
-	if(delay == 0) {
+	if(delay > 0 && byte == 0x80) {
+		++delay;
+	} else {
+		// Flush delay
+		if(delay > 0) {
+			out << '\x00';
+			while(--delay) {
+				out << '\x80';
+			}
+			delay = 0;
+		}
+		
+		// Output byte
 		if(byte == 0x00) {
-			out << byte;
 			delay = 1;
 		} else {
 			out << byte;
-			delay = 0;
 		}
-	} else if(delay == 1) {
-		if(byte == 0x00) {
-			out << byte;
-		} else if(byte == 0x80) {
-			delay = 2;
-		} else {
-			out << byte;
-			delay = 0;
-		}
-	} else if(delay == 2) {
-		out << '\x80';
-		out << byte;
-		delay = (byte == 0) ? 1 : 0;
 	}
 }
