@@ -77,6 +77,53 @@ std::vector<std::string> generate_bytestrings(uint length)
 	return result;
 }
 
+template<class T>
+T ipow(T base, unsigned int exp)
+{
+	T result = 1;
+	while (exp) {
+		if (exp & 1)
+			result *= base;
+		exp >>= 1;
+		base *= base;
+	}
+	return result;
+}
+
+std::vector<std::string> generate_simple_bytestrings(uint length)
+{
+	const std::vector<std::uint8_t> bytes{0x00, 0x80, 0xFF};
+	
+	assert(length < 4);
+	std::vector<std::string> results;
+	results.reserve(ipow(bytes.size(), length + 1) - 1);
+	results.push_back(std::string{});
+	
+	for(uint l = 1; l <= length; ++l) {
+		const uint max = ipow(bytes.size(), l);
+		for(uint c = 0; c < max; ++c) {
+			uint k = c;
+			std::string result;
+			result.reserve(l);
+			for(uint i = 0; i < l; ++i) {
+				result.push_back(bytes[k % bytes.size()]);
+				k /= bytes.size();
+			}
+			results.push_back(result);
+		}
+	}
+	return results;
+}
+
+std::string hex(const std::string& bytes)
+{
+	std::ostringstream out;
+	for(uint8_t byte: bytes) {
+		out << std::hex << std::setfill('0') << std::setw(2) << static_cast<uint64>(byte);
+	}
+	return out.str();
+}
+
 TEST(BinaryEncodeDecode)
 {
 	const Inputs inputs = generate_bitstrings(10);
@@ -111,7 +158,8 @@ TEST(BinaryEncodeDecode)
 			}
 			
 			// Encode
-			buffer = std::stringstream{};
+			buffer.str(std::string());
+			buffer.clear();
 			totalBits = 0.0;
 			{
 				EntropyWriter ew(buffer);
@@ -160,7 +208,7 @@ TEST(BinaryEncodeDecode)
 
 TEST(BinaryDecodeEncode)
 {
-	const std::vector<std::string> byte_strings = generate_bytestrings(1);
+	const std::vector<std::string> byte_strings = generate_simple_bytestrings(2);
 	for(double p: probabilities) {
 		
 		// Model
@@ -202,10 +250,10 @@ TEST(BinaryDecodeEncode)
 				}
 			}
 			
+			// CHECK_EQUAL(hex(input), hex(out.str()));
 			CHECK_EQUAL(input, out.str());
 		}
 	}
 }
-
 
 }
