@@ -38,14 +38,16 @@ void EntropyWriter::write(const Interval& symbol)
 	}
 	
 	// Shift out bits
-	for(bool bit: current.normalize()) {
-		if(bit) {
+	auto bits = current.normalize();
+	while(bits.second--) {
+		if(bits.first >= Interval::msb) {
 			bw.write_one();
 			end.one();
 		} else {
 			bw.write_zero();
 			end.zero();
 		}
+		bits.first <<= 1;
 	}
 	
 	// Generate a new potential ending

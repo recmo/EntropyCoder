@@ -59,24 +59,19 @@ bool CodeInterval::update(const Interval& symbol)
 	return base < t;
 }
 
-std::vector<bool> CodeInterval::normalize()
+std::pair<Interval::uint64, int> CodeInterval::normalize()
 {
-	std::vector<bool> result;
-	
-	// Calculate number of bits to shift out
-	const uint n = range == 0 ? 63 : count_leading_zeros(range);
-	result.reserve(n);
-	
-	// Shift out bits
-	while(range < msb) {
-		const bool bit = base >= msb;
-		result.push_back(bit);
-		base <<= 1;
-		range <<= 1;
-		range |= 1;
+	const uint64 bits = base;
+	if(range == 0) {
+		base = 0;
+		range = max;
+		return {bits, 64};
+	} else {
+		const int n = count_leading_zeros(range);
+		base <<= n;
+		range <<= n;
+		range |= (1UL << n) - 1UL;
+		assert(range >= msb);
+		return {bits, n};
 	}
-	
-	// Check our state
-	assert(range >= msb);
-	return result;
 }

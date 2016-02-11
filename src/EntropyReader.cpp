@@ -42,12 +42,15 @@ void EntropyReader::read(const Interval& symbol)
 	if(current.update(symbol)) {
 		end.carry();
 	}
-	for(bool bit: current.normalize()) {
-		if(bit) {
+	auto bits = current.normalize();
+	while(bits.second--) {
+		if(bits.first >= Interval::msb) {
 			end.one();
 		} else {
 			end.zero();
 		}
+		bits.first <<= 1;
+		
 		value <<= 1;
 		if(!br.eof()) {
 			value |= br.read_bit() ? 1 : 0;

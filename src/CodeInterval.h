@@ -1,5 +1,6 @@
 #pragma once
 #include "Interval.h"
+#include <tuple>
 
 class CodeInterval: public Interval {
 public:
@@ -10,5 +11,7 @@ public:
 	
 	/// @returns true on carry
 	bool update(const Interval& symbol);
-	std::vector<bool> normalize();
+	
+	/// @returns (b, n) where b has n bits of output in its most significant bits
+	std::pair<uint64, int> normalize();
 };
