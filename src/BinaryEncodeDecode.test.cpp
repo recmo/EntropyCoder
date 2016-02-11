@@ -79,7 +79,7 @@ std::vector<std::string> generate_bytestrings(uint length)
 
 TEST(BinaryEncodeDecode)
 {
-	const Inputs inputs = generate_bitstrings(9);
+	const Inputs inputs = generate_bitstrings(10);
 	std::stringstream buffer;
 	for(double p: probabilities) {
 		
@@ -162,8 +162,6 @@ TEST(BinaryDecodeEncode)
 {
 	const std::vector<std::string> byte_strings = generate_bytestrings(1);
 	for(double p: probabilities) {
-		
-		std::cerr << p << std::endl;
 		
 		// Model
 		const Interval intervalTrue{p};
