@@ -1,5 +1,7 @@
 #include "Endings.h"
 #include <stdexcept>
+#include <iostream>
+#include <iomanip>
 
 constexpr bool print = false;
 
@@ -274,14 +276,10 @@ void Endings::generate(const CodeInterval& interval)
 	if(print) std::cerr << state << " generate " << interval << " " << reserved_endings << "\n";
 	assert(ending.empty());
 	
+	// Test
+	current_set_number(interval);
 	
-	End test = first();
-	if(!reserved_endings.empty()) {
-		test = next(reserved_endings.back());
-	}
-	while(!is_valid(interval, test)) {
-		test = next(test);
-	}
+	End test = reserved_endings.empty() ? first(interval) : next(interval, reserved_endings.back());
 	
 	ending = first();
 	if(print) std::cerr << "Next: " << ending;
@@ -358,4 +356,139 @@ Endings::End Endings::next(End current, int msb)
 		current.push_back(true);
 	}
 	return current;
+}
+
+Endings::End Endings::first(const CodeInterval& interval)
+{
+	End result = first();
+	while(!is_valid(interval, result)) {
+		result = next(result);
+	}
+	return result;
+}
+
+Endings::End Endings::next(const CodeInterval& interval, Endings::End current)
+{
+	End result = next(current);
+	while(!is_valid(interval, result)) {
+		result = next(result);
+	}
+	return result;
+}
+
+uint Endings::current_set_number(const CodeInterval& interval)
+{
+	uint n = 0;
+	End e = first(interval);
+	while(is_reserved(e)) {
+		++n;
+		e = next(interval, e);
+	}
+	assert(n == reserved_endings.size());
+	return n;
+}
+
+uint Endings::current_set_number()
+{
+	uint n = 0;
+	End e = first();
+	while(is_reserved(e)) {
+		++n;
+		e = next(e);
+	}
+	if(n != reserved_endings.size()) {
+		std::cerr << std::endl;
+		std::cerr << "r = " << reserved_endings;
+		std::cerr << std::endl;
+		std::cerr << "n = " << n;
+		std::cerr << std::endl;
+	}
+	assert(n == reserved_endings.size());
+	return n;
+}
+
+Endings::Set Endings::gen_current_set(const CodeInterval& interval, uint n)
+{
+	Set result;
+	result.reserve(n);
+	End e = first(interval);
+	while(n-- > 0) {
+		result.push_back(e);
+		e = next(interval, e);
+	}
+	return result;
+}
+
+Endings::Set Endings::gen_current_set(uint n)
+{
+	Set result;
+	result.reserve(n);
+	End e = first();
+	while(n-- > 0) {
+		result.push_back(e);
+		e = next(e);
+	}
+	return result;
+}
+
+void Endings::experiment()
+{
+	std::cerr <<  "  n   1   2   3   4   5   6   7   8\n";
+	std::cerr <<  "--- --- --- --- --- --- --- --- ---\n";
+	for(uint n = 0; n <= 30; ++n) {
+		std::cerr << std::setw(3) << n;
+		
+		// 1
+		state = s0p;
+		reserved_endings = gen_current_set(n);
+		prune_carry();
+		std::cerr << std::setw(4) << current_set_number();
+		
+		// 2
+		state = s1p;
+		//std::cerr << "\nn: " << n;
+		reserved_endings = gen_current_set(n);
+		//std::cerr << "\nbefore prune_carry: " << reserved_endings;
+		prune_carry();
+		//std::cerr << "\nafter prune_carry: " << reserved_endings;
+		std::cerr << std::setw(4) << current_set_number();
+		
+		// 3
+		state = s0p;
+		reserved_endings = gen_current_set(n);
+		prune_zero();
+		std::cerr << std::setw(4) << current_set_number();
+		
+		// 4
+		state = s1n;
+		reserved_endings = gen_current_set(n);
+		prune_zero();
+		std::cerr << std::setw(4) << current_set_number();
+		
+		// 5
+		state = s1p;
+		reserved_endings = gen_current_set(n);
+		prune_zero();
+		std::cerr << std::setw(4) << current_set_number();
+		
+		// 6
+		state = s0p;
+		reserved_endings = gen_current_set(n);
+		prune_one();
+		std::cerr << std::setw(4) << current_set_number();
+		
+		// 7
+		state = s1n;
+		reserved_endings = gen_current_set(n);
+		prune_one();
+		std::cerr << std::setw(4) << current_set_number();
+		
+		// 8
+		state = s1p;
+		reserved_endings = gen_current_set(n);
+		prune_one();
+		std::cerr << std::setw(4) << current_set_number();
+		
+		std::cerr << "\n";
+	}
 }

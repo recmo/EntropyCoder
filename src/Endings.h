@@ -15,6 +15,10 @@ public:
 	void prune_zero();
 	void generate(const CodeInterval& interval);
 	
+	std::vector<bool> current_ending() { return ending; }
+	
+	void experiment();
+	
 private:
 	enum State {
 		s0p = 0, // 0⁺
@@ -33,4 +37,15 @@ private:
 	End first();
 	End next(End current);
 	End next(End current, int msb);
+	
+	End first(const CodeInterval& interval);
+	End next(const CodeInterval& interval, End current);
+	
+	uint current_set_number(const CodeInterval& interval);
+	Set gen_current_set(const CodeInterval& interval, uint n);
+	
+	uint current_set_number();
+	Set gen_current_set(uint n);
 };
+
+std::ostream& operator<<(std::ostream& out, const std::vector<bool>& end);
