@@ -15,7 +15,7 @@ std::pair<uint64, uint64> add128(uint64 h, uint64 l, uint64 n)
 {
 	l += n;
 	h += (l < n) ? 1 : 0;
-	return std::make_pair(h, l);
+	return {h, l};
 }
 
 std::pair<uint64, uint64> mul128_emu(uint64 a, uint64 b);
@@ -28,7 +28,7 @@ std::pair<uint64, uint64> mul128(uint64 a, uint64 b)
 		asm("mulq %3"
 			: "=a"(l), "=d"(h)
 			: "a"(a), "rm"(b));
-		return std::make_pair(h, l);
+		return {h, l};
 	#else
 		return mul128_emu(a, b);
 	#endif
@@ -43,7 +43,7 @@ std::pair<uint64, uint64> div128(uint64 h, uint64 l, uint64 d)
 		asm("divq %4"
 			: "=a"(q), "=d"(r)
 			: "d"(h), "a"(l), "rm"(d));
-		return std::make_pair(q, r);
+		return {q, r};
 	#else
 		return div128_emu(h, l, d);
 	#endif
@@ -68,5 +68,5 @@ std::pair<uint64, uint64> mul128_emu(uint64 a, uint64 b)
 	
 	const uint64 h = (a * b) + w1 + k;
 	const uint64 l = (t << 32) + w3;
-	return std::make_pair(h, l);
+	return {h, l};
 }
