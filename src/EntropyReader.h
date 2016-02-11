@@ -3,6 +3,7 @@
 #include "BinaryReader.h"
 #include "CodeInterval.h"
 #include "Endings.h"
+#include "End.h"
 
 class EntropyReader {
 public:
@@ -18,5 +19,6 @@ private:
 	CodeInterval current;
 	Interval::uint64 value;
 	Endings endings;
+	End end;
 	uint64 past_end = 0;
 };

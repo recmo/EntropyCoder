@@ -79,7 +79,6 @@ std::vector<std::string> generate_bytestrings(uint length)
 
 TEST(BinaryEncodeDecode)
 {
-	// return;
 	const Inputs inputs = generate_bitstrings(9);
 	std::stringstream buffer;
 	for(double p: probabilities) {
