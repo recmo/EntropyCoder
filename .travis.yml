@@ -23,7 +23,7 @@ install:
     - if [ "$CXX" = "clang++" ]; then export CXX="clang++-3.8" CC="clang-3.8"; fi
 before_script:
     - git clone https://github.com/unittest-cpp/unittest-cpp.git
-    - cd unittest-cpp && cmake . -DCMAKE_INSTALL_PREFIX=/usr/local -DCMAKE_CXX_FLAGS="-fPIE" && make VERBOSE=1 && sudo make install
+    - pushd unittest-cpp && cmake . -DCMAKE_INSTALL_PREFIX=/usr/local -DCMAKE_CXX_FLAGS="-fPIE" && make VERBOSE=1 && sudo make install && popd
 script: make SHELL="/bin/sh -x"
 
 
