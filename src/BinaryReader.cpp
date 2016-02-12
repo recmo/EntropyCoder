@@ -45,10 +45,9 @@ BinaryReader::uint8 BinaryReader::read_byte()
 		in.peek();
 		append = byte == 0x00 || (append && byte == 0x80);
 		return byte;
-	} else if(append) {
+	} else {
+		assert(append);
 		append = false;
 		return 0x80;
-	} else {
-		throw std::runtime_error("Can not read beyond end of file.");
 	}
 }

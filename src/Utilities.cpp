@@ -1,5 +1,6 @@
 #include "Utilities.h"
 #include <iomanip>
+#include <stdexcept>
 typedef std::uint64_t uint64;
 
 uint64 count_leading_zeros(uint64 value)
@@ -38,6 +39,9 @@ std::pair<uint64, uint64> div128_emu(uint64 h, uint64 l, uint64 d);
 
 std::pair<uint64, uint64> div128(uint64 h, uint64 l, uint64 d)
 {
+	if(d == 0) {
+		throw std::runtime_error("Divide by zero.");
+	}
 	#ifdef __LP64__
 		uint64 q, r;
 		asm("divq %4"

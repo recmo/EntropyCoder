@@ -4,6 +4,8 @@
 
 class CodeInterval: public Interval {
 public:
+	CodeInterval(): Interval{} { }
+	CodeInterval(const Interval& interval): Interval{interval} { }
 	
 	bool is_normalized() const;
 	bool wraps() const;

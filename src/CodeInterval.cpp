@@ -13,6 +13,9 @@ bool CodeInterval::wraps() const
 
 Interval::uint64 CodeInterval::descale(Interval::uint64 value) const
 {
+	if(!is_normalized()) {
+		throw std::range_error("Interval must be normalized before descale.");
+	}
 	if(!includes(value)) {
 		throw std::range_error("Value not in interval.");
 	}
@@ -31,8 +34,7 @@ Interval::uint64 CodeInterval::descale(Interval::uint64 value) const
 
 bool CodeInterval::update(const Interval& symbol)
 {
-	// Check if we are normalized
-	if(range < msb) {
+	if(!is_normalized()) {
 		throw std::range_error("Interval must be normalized before update.");
 	}
 	

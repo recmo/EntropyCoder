@@ -17,6 +17,8 @@ string read(const string input)
 		while(!br.eof()) {
 			out.append(br.read_bit() ? "1" : "0");
 		}
+		CHECK(br.eof());
+		CHECK_THROW(br.read_bit(), std::runtime_error);
 	}
 	CHECK(in.eof());
 	return out;

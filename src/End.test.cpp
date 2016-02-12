@@ -57,6 +57,29 @@ End make(const std::string& string)
 	return End{state, bits};
 }
 
+std::string to_string(const End& end)
+{
+	std::ostringstream out;
+	out << end;
+	return out.str();
+}
+
+TEST(ToString)
+{
+	CHECK_EQUAL("S:0.", to_string(make("S:0.")));
+	CHECK_EQUAL("0:0.001", to_string(make("0:0.001")));
+	CHECK_EQUAL("S:0.0101", to_string(make("S:0.0101")));
+	CHECK_EQUAL("0:1.11", to_string(make("0:1.11")));
+	CHECK_EQUAL("1:1.11", to_string(make("1:1.11")));
+}
+
+TEST(IllegalConstruct)
+{
+	End::State illegal = (End::State)(10);
+	CHECK_THROW(End{illegal}, std::logic_error);
+	CHECK_THROW((End{End::sS, 0x8000000000000000UL}), std::logic_error);
+}
+
 TEST(generate_state_S)
 {
 	// Test small endings

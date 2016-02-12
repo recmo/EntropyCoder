@@ -126,6 +126,7 @@ std::string hex(const std::string& bytes)
 
 TEST(BinaryEncodeDecode)
 {
+	// return;
 	const Inputs inputs = generate_bitstrings(10);
 	std::stringstream buffer;
 	for(double p: probabilities) {
@@ -208,6 +209,7 @@ TEST(BinaryEncodeDecode)
 
 TEST(BinaryDecodeEncode)
 {
+	// return;
 	const std::vector<std::string> byte_strings = generate_simple_bytestrings(2);
 	for(double p: probabilities) {
 		

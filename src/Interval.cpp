@@ -15,6 +15,7 @@ std::ostream& operator<<(std::ostream& out, const Interval& interval)
 	out << std::setw(16) << std::setfill('0') << std::hex;
 	out << interval.base + interval.range + 1;
 	out << ")";
+	out << std::dec;
 	return out;
 }
 

@@ -31,7 +31,6 @@ std::ostream& operator<<(std::ostream& out, const End& end)
 		case End::sS: out << "S:"; break;
 		case End::s0: out << "0:"; break;
 		case End::s1: out << "1:"; break;
-		default: throw std::logic_error("Invalid state.");
 	}
 	std::uint64_t bits = end.ending;
 	out << (bits >= End::msb ? "1." : "0.");

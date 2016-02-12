@@ -108,4 +108,66 @@ TEST(IllegalProbability)
 	CHECK_THROW(Interval{std::numeric_limits<double>().signaling_NaN()}, std::range_error);
 }
 
+TEST(GetProbability)
+{
+	CHECK_EQUAL(0.125, Interval{0.125}.probability());
+	CHECK_EQUAL(0.25 , Interval{0.25 }.probability());
+	CHECK_EQUAL(0.375, Interval{0.375}.probability());
+	CHECK_EQUAL(0.5  , Interval{0.5  }.probability());
+	CHECK_EQUAL(0.625, Interval{0.625}.probability());
+	CHECK_EQUAL(0.75 , Interval{0.75 }.probability());
+	CHECK_EQUAL(0.875, Interval{0.875}.probability());
+	CHECK_EQUAL(1.0  , Interval{1.0  }.probability());
+	CHECK_EQUAL(std::exp2(- 4), Interval{std::exp2(- 4)}.probability());
+	CHECK_EQUAL(std::exp2(- 8), Interval{std::exp2(- 8)}.probability());
+	CHECK_EQUAL(std::exp2(-16), Interval{std::exp2(-16)}.probability());
+	CHECK_EQUAL(std::exp2(-24), Interval{std::exp2(-24)}.probability());
+	CHECK_EQUAL(std::exp2(-32), Interval{std::exp2(-32)}.probability());
+	CHECK_EQUAL(std::exp2(-40), Interval{std::exp2(-40)}.probability());
+	CHECK_EQUAL(std::exp2(-48), Interval{std::exp2(-48)}.probability());
+	CHECK_EQUAL(std::exp2(-56), Interval{std::exp2(-56)}.probability());
+	CHECK_EQUAL(std::exp2(-60), Interval{std::exp2(-60)}.probability());
+	CHECK_EQUAL(std::exp2(-63), Interval{std::exp2(-63)}.probability());
+}
+
+TEST(GetEntropy)
+{
+	const double tolerance = std::numeric_limits<double>().epsilon();
+	
+	CHECK_EQUAL(3.0  , Interval{0.125}.entropy());
+	CHECK_EQUAL(2.0  , Interval{0.25 }.entropy());
+	CHECK_EQUAL(1.0  , Interval{0.5  }.entropy());
+	CHECK_EQUAL(0.0  , Interval{1.0  }.entropy());
+	CHECK_CLOSE(1.415037499278844 , Interval{0.375}.entropy(), tolerance);
+	CHECK_CLOSE(0.6780719051126377, Interval{0.625}.entropy(), tolerance);
+	CHECK_CLOSE(0.4150374992788438, Interval{0.75 }.entropy(), tolerance);
+	CHECK_CLOSE(0.1926450779423959, Interval{0.875}.entropy(), tolerance);
+}
+
+TEST(IllegalInterval)
+{
+	CHECK_THROW((Interval{0x0000000000000000UL, 0x0000000000000000UL}), std::range_error);
+	CHECK_THROW((Interval{0x8000000000000000UL, 0x0000000000000000UL}), std::range_error);
+	CHECK_THROW((Interval{0xFFFFFFFFFFFFFFFFUL, 0x0000000000000000UL}), std::range_error);
+	CHECK_THROW((Interval{0x0000000000000001UL, 0xFFFFFFFFFFFFFFFFUL}), std::range_error);
+	CHECK_THROW((Interval{0x8000000000000000UL, 0x8000000000000000UL}), std::range_error);
+	CHECK_THROW((Interval{0xFFFFFFFFFFFFFFFEUL, 0x0000000000000002UL}), std::range_error);
+}
+
+TEST(Overlaps)
+{
+	// TODO CHECK_EQUAL(true , largest.overlaps(smallest));
+	// TODO CHECK_EQUAL(true , largest.overlaps(half1));
+	// TODO CHECK_EQUAL(true , largest.overlaps(half2));
+	CHECK_EQUAL(true , smallest.overlaps(largest));
+	CHECK_EQUAL(true , smallest.overlaps(half1));
+	CHECK_EQUAL(false, smallest.overlaps(half2));
+	CHECK_EQUAL(true , half1.overlaps(largest));
+	// TODO CHECK_EQUAL(true , half1.overlaps(smallest));
+	CHECK_EQUAL(false, half1.overlaps(half2));
+	// TODO CHECK_EQUAL(true , half2.overlaps(largest));
+	CHECK_EQUAL(false, half2.overlaps(smallest));
+	CHECK_EQUAL(false, half2.overlaps(half1));
+}
+
 }
