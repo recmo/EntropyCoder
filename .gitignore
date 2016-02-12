@@ -1,6 +1,7 @@
 .*
 build
-*.kdev4
+coverage
 test
 EntropyCoder
+*.kdev4
 

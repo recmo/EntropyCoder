@@ -18,13 +18,15 @@ flags     += -DPROGRAM=\"$(program)\" -Isrc -fPIE -flto -Wall -Wextra
 flags     += -Wno-unused-parameter -Werror=return-type -Werror=switch
 flags     += -ftemplate-backtrace-limit=0 $(patsubst %,-fsanitize=%,$(sanitize))
 flags     += $(if $(clang),-fsanitize-blacklist=sanitize-blacklist.txt,)
-libs      += -pie -fuse-ld=gold 
+flags     += $(if $(clang),-fprofile-arcs -ftest-coverage,--coverage)
+libs      += -pie -fuse-ld=gold
 libs      += $(if $(packages), $(shell pkg-config --libs $(packages)))
 pch       := $(if $(clang),-include-pch build/pch.h.gch,-include build/pch.h)
 all       :  build run-tests
 build     :  $(program) test
+coverage  :  coverage/index.html
 print-%   :  ; @echo $* = $($*)
-.PHONY    :  build run-tests clean
+.PHONY    :  build run-tests clean coverage
 .SECONDARY:
 -include    $(patsubst src/%.cpp, build/%.d, $(sources))
 
@@ -60,8 +62,24 @@ test: $(objects) $(tests) build/test.o
 # Tame ASAN for https://github.com/google/sanitizers/issues/647
 run-tests: test
 	@echo "Test  " $(program)
+	@rm -f $(patsubst %.o,%.gcda,$(objects) $(tests))
 	@ASAN_OPTIONS=detect_odr_violation=1 ./$<
+
+build/%.gcda: build/%.o run-tests
+	@true
+
+build/lcov.info: $(patsubst %.o,%.gcda,$(objects) $(tests))
+	@echo "Lcov  " test
+	@lcov --quiet --base-directory src --no-external --directory build \
+		$(if $(clang),--gcov-tool ./llvm-gcov,) --capture --output-file $@
+	@lcov --quiet --remove $@ src/*.test.cpp src/test.cpp \
+		$(if $(clang),--gcov-tool ./llvm-gcov,) --output-file $@
+
+coverage/index.html: build/lcov.info
+	@echo "Html  " test
+	@genhtml --quiet --title "$(program)" --legend --num-spaces 4 \
+		--output-directory coverage $^
 
 clean:
 	@echo "Clean  " $(program)
-	@rm -Rf build $(program) test
+	@rm -Rf build coverage $(program) test
