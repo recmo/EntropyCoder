@@ -3,6 +3,7 @@
 #include "BinaryReader.h"
 #include "CodeInterval.h"
 #include "End.h"
+namespace EntropyCoder {
 
 class EntropyReader {
 public:
@@ -20,3 +21,5 @@ private:
 	End end;
 	uint64 past_end = 0;
 };
+
+} // namespace EntropyCoder

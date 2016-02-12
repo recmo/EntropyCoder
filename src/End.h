@@ -1,6 +1,7 @@
 #pragma once
 #include <cstdint>
 #include <ostream>
+namespace EntropyCoder {
 class CodeInterval;
 
 class End
@@ -37,3 +38,5 @@ private:
 };
 
 std::ostream& operator<<(std::ostream& out, const End& end);
+
+} // namespace EntropyCoder

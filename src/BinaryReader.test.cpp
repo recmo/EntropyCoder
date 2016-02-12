@@ -6,6 +6,7 @@
 using std::string;
 
 SUITE(BinaryReader) {
+using EntropyCoder::BinaryReader;
 
 string read(const string input)
 {

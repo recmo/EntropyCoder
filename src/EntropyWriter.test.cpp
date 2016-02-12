@@ -3,6 +3,8 @@
 #include <sstream>
 
 SUITE(EntropyWriter) {
+using EntropyCoder::Interval;
+using EntropyCoder::EntropyWriter;
 
 TEST(Simple)
 {

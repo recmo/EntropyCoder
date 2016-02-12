@@ -1,6 +1,7 @@
 #include "BinaryReader.h"
 #include <iostream>
 #include <stdexcept>
+namespace EntropyCoder {
 
 BinaryReader::BinaryReader(std::istream& input)
 : in(input)
@@ -51,3 +52,5 @@ BinaryReader::uint8 BinaryReader::read_byte()
 		return 0x80;
 	}
 }
+
+} // namespace EntropyCoder

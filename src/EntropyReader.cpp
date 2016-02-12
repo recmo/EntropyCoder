@@ -3,6 +3,7 @@
 #include <cassert>
 #include <iostream>
 #include <iomanip>
+namespace EntropyCoder {
 
 constexpr bool print = false;
 
@@ -66,3 +67,5 @@ void EntropyReader::read(const Interval& symbol)
 	}
 	end.first(current);
 }
+
+} // namespace EntropyCoder

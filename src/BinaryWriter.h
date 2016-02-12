@@ -2,6 +2,7 @@
 #include <cstdint>
 #include <iostream>
 #include <limits>
+namespace EntropyCoder {
 
 /// Class for writing ones and zeros with carry propagation.
 class BinaryWriter {
@@ -49,3 +50,5 @@ private:
 	void write_byte2(uint8_t byte);
 	uint delay = 0;
 };
+
+} // namespace EntropyCoder

@@ -1,5 +1,6 @@
 #include "CodeInterval.h"
 #include "Utilities.h"
+namespace EntropyCoder {
 
 bool CodeInterval::is_normalized() const
 {
@@ -77,3 +78,5 @@ std::pair<Interval::uint64, int> CodeInterval::normalize()
 		return {bits, n};
 	}
 }
+
+} // namespace EntropyCoder

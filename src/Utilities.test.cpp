@@ -12,10 +12,16 @@ std::ostream& operator<<(std::ostream& out, const std::pair<std::uint64_t, std::
 
 #include <UnitTest++.h>
 
-std::pair<std::uint64_t, std::uint64_t> mul128_emu(std::uint64_t a, std::uint64_t b);
-
+namespace EntropyCoder {
+	std::pair<std::uint64_t, std::uint64_t> mul128_emu(std::uint64_t a, std::uint64_t b);
+}
 
 SUITE(Utilities) {
+using EntropyCoder::count_leading_zeros;
+using EntropyCoder::add128;
+using EntropyCoder::div128;
+using EntropyCoder::mul128;
+using EntropyCoder::mul128_emu;
 
 // Nine special values
 const std::uint64_t c0 = 0x0000000000000000UL;

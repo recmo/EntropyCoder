@@ -2,6 +2,7 @@
 #include <cstdint>
 #include <iostream>
 #include <limits>
+namespace EntropyCoder {
 
 // The represented interval is [base · 2⁻⁶⁴, (base + range + 1) · 2⁻⁶⁴)
 class Interval {
@@ -28,3 +29,5 @@ public:
 };
 
 std::ostream& operator<<(std::ostream& out, const Interval& interval);
+
+} // namespace EntropyCoder

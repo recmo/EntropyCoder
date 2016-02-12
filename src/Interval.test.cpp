@@ -5,6 +5,7 @@
 #include <limits>
 
 SUITE(Interval) {
+using EntropyCoder::Interval;
 
 const Interval smallest{0x0000000000000000UL, 0x0000000000000001UL};
 const Interval largest{0x0000000000000000UL, 0xFFFFFFFFFFFFFFFFUL};

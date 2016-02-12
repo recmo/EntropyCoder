@@ -1,6 +1,7 @@
 #pragma once
 #include <cstdint>
 #include <iostream>
+namespace EntropyCoder {
 
 class BinaryReader {
 public:
@@ -25,3 +26,5 @@ private:
 	bool byte_eof() const;
 	uint8 read_byte();
 };
+
+} // namespace EntropyCoder

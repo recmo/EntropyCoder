@@ -1,6 +1,7 @@
 #pragma once
 #include "Interval.h"
 #include <tuple>
+namespace EntropyCoder {
 
 class CodeInterval: public Interval {
 public:
@@ -17,3 +18,5 @@ public:
 	/// @returns (b, n) where b has n bits of output in its most significant bits
 	std::pair<uint64, int> normalize();
 };
+
+} // namespace EntropyCoder

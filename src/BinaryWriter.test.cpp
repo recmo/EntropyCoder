@@ -7,6 +7,7 @@
 using std::string;
 
 SUITE(BinaryWriter) {
+using EntropyCoder::BinaryWriter;
 
 string write(const string input)
 {

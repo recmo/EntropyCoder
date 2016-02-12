@@ -4,6 +4,7 @@
 #include <iostream>
 #include <iomanip>
 #include <stdexcept>
+namespace EntropyCoder {
 
 std::ostream& operator<<(std::ostream& out, const Interval& interval)
 {
@@ -92,3 +93,5 @@ bool Interval::overlaps(const Interval& interval) const
 {
 	return includes(interval.base) && !includes(interval);
 }
+
+} // namespace EntropyCoder

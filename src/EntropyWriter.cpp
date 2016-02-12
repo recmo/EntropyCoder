@@ -3,6 +3,7 @@
 #include <iostream>
 #include <iomanip>
 #include <algorithm>
+namespace EntropyCoder {
 
 constexpr bool print = false;
 
@@ -53,3 +54,5 @@ void EntropyWriter::write(const Interval& symbol)
 	// Generate a new potential ending
 	end.first(current);
 }
+
+} // namespace EntropyCoder

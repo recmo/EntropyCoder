@@ -1,6 +1,7 @@
 #include "End.h"
 #include "CodeInterval.h"
 #include <stdexcept>
+namespace EntropyCoder {
 
 End::End(End::State _state)
 : state{_state}
@@ -133,3 +134,5 @@ bool End::is_valid(const CodeInterval& interval)
 	const bool wrap_valid = carry == (value < interval.base);
 	return value_valid && carry_valid && wrap_valid;
 }
+
+} // namespace EntropyCoder

@@ -4,6 +4,9 @@
 #include <stdexcept>
 
 SUITE(End) {
+using EntropyCoder::Interval;
+using EntropyCoder::CodeInterval;
+using EntropyCoder::End;
 
 CodeInterval interval(Interval::uint64 base, Interval::uint64 range)
 {

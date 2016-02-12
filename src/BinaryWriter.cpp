@@ -1,5 +1,6 @@
 #include "BinaryWriter.h"
 #include <cassert>
+namespace EntropyCoder {
 
 constexpr bool print = false;
 
@@ -150,3 +151,5 @@ void BinaryWriter::write_byte2(uint8_t byte)
 		}
 	}
 }
+
+} // namespace EntropyCoder

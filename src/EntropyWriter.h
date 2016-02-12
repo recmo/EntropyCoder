@@ -3,6 +3,7 @@
 #include "BinaryWriter.h"
 #include "CodeInterval.h"
 #include "End.h"
+namespace EntropyCoder {
 
 class EntropyWriter {
 public:
@@ -16,3 +17,5 @@ private:
 	CodeInterval current;
 	End end;
 };
+
+} // namespace EntropyCoder

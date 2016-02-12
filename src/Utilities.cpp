@@ -1,6 +1,7 @@
 #include "Utilities.h"
 #include <iomanip>
 #include <stdexcept>
+namespace EntropyCoder {
 typedef std::uint64_t uint64;
 
 uint64 count_leading_zeros(uint64 value)
@@ -74,3 +75,5 @@ std::pair<uint64, uint64> mul128_emu(uint64 a, uint64 b)
 	const uint64 l = (t << 32) + w3;
 	return {h, l};
 }
+
+} // namespace EntropyCoder

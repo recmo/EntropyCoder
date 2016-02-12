@@ -10,6 +10,9 @@
 #include <sstream>
 #include <stdexcept>
 #include <vector>
+using EntropyCoder::Interval;
+using EntropyCoder::EntropyReader;
+using EntropyCoder::EntropyWriter;
 
 template<class T, class A>
 std::ostream& operator<<(std::ostream& out, const std::vector<T,A>& v)

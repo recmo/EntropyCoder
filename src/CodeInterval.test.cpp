@@ -6,6 +6,8 @@
 #include <limits>
 
 SUITE(CodeInterval) {
+using EntropyCoder::Interval;
+using EntropyCoder::CodeInterval;
 
 // Subclass of Interval that allows unsafe initialization
 class UnsafeInterval: public Interval {
