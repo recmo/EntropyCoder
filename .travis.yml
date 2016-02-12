@@ -1,5 +1,7 @@
 language: cpp
-compiler: clang
+compiler:
+   - clang
+   - gcc
 
 # Travis by default uses Clang version 3.4, which is to old for us (no c++14).
 addons:
