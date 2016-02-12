@@ -2,23 +2,28 @@ language: cpp
 compiler:
    - clang
    - gcc
+env:
+   -
+   - sanitize="undefined address"
+   - sanitize="undefined memory"
+   - sanitize="undefined thread"
 
-# Travis by default uses Clang version 3.4, which is to old for us (no c++14).
+# Travis by default uses Clang version 3.4, which is to old for us.
 addons:
     apt:
         sources:
-            - llvm-toolchain-precise-3.7
+            - llvm-toolchain-precise
             - ubuntu-toolchain-r-test
         packages:
-            - clang-3.7
+            - clang-3.8
             - g++-5
             - gcc-5
-            - binutils
-            - llvm-3.7-dev
-            - libclang-common-3.7-dev
-            - libunittest++-dev
 install:
     - if [ "$CXX" = "g++" ]; then export CXX="g++-5" CC="gcc-5"; fi
-    - if [ "$CXX" = "clang++" ]; then export CXX="clang++-3.7" CC="clang-3.7"; fi
-
+    - if [ "$CXX" = "clang++" ]; then export CXX="clang++-3.8" CC="clang-3.8"; fi
+before_script:
+    - git clone https://github.com/unittest-cpp/unittest-cpp.git
+    - cd unittest-cpp && cmake . -DCMAKE_INSTALL_PREFIX=/usr/local -DCMAKE_CXX_FLAGS="-fPIE" && make VERBOSE=1 && sudo make install
 script: make SHELL="/bin/sh -x"
+
+

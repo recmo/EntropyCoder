@@ -2,31 +2,33 @@ program  := EntropyCoder
 packages := unittest++
 
 flags    += -std=c++11 -O2 -g
-flags    += -fsanitize=address,undefined
+sanitize ?= undefined leak
 
 ################################################################################
 
-sources  := $(shell find src -name *.cpp)
-headers  := $(shell find src -name *.h)
-objects  := $(patsubst src/%.cpp, build/%.o, $(sources))
-tests    := $(filter build/%.test.o,$(objects))
-objects  := $(filter-out $(tests) build/main.o build/test.o,$(objects))
-flags    += $(if $(packages), $(shell pkg-config --cflags $(packages)))
-flags    += -DVERSION=\"$(shell git show --pretty=format:%h -q HEAD)\"
-flags    += -DPROGRAM=\"$(program)\" -Isrc -fPIC -fuse-ld=gold -flto -Wall
-flags    += -Wextra -Wno-unused-parameter -Werror=return-type -Werror=switch
-flags    += -ftemplate-backtrace-limit=0
-libs     += $(if $(packages), $(shell pkg-config --libs $(packages)))
-pch      := $(if $(findstring clang,${CXX}),-include-pch build/pch.h.gch,-include build/pch.h)
-
-################################################################################
-
-all: build run-tests
-build: $(program) test
-print-%:; @echo $* = $($*)
+sources   := $(shell find src -name *.cpp)
+headers   := $(shell find src -name *.h)
+objects   := $(patsubst src/%.cpp, build/%.o, $(sources))
+tests     := $(filter build/%.test.o,$(objects))
+objects   := $(filter-out $(tests) build/main.o build/test.o,$(objects))
+clang     := $(findstring clang,${CXX})
+flags     += $(if $(packages), $(shell pkg-config --cflags $(packages)))
+flags     += -DVERSION=\"$(shell git show --pretty=format:%h -q HEAD)\"
+flags     += -DPROGRAM=\"$(program)\" -Isrc -fPIE -flto -Wall -Wextra 
+flags     += -Wno-unused-parameter -Werror=return-type -Werror=switch
+flags     += -ftemplate-backtrace-limit=0 $(patsubst %,-fsanitize=%,$(sanitize))
+flags     += $(if $(clang),-fsanitize-blacklist=sanitize-blacklist.txt,)
+libs      += -pie -fuse-ld=gold 
+libs      += $(if $(packages), $(shell pkg-config --libs $(packages)))
+pch       := $(if $(clang),-include-pch build/pch.h.gch,-include build/pch.h)
+all       :  build run-tests
+build     :  $(program) test
+print-%   :  ; @echo $* = $($*)
+.PHONY    :  build run-tests clean
 .SECONDARY:
-.PHONY: build run-tests clean
--include $(patsubst src/%.cpp, build/%.d, $(sources))
+-include    $(patsubst src/%.cpp, build/%.d, $(sources))
+
+################################################################################
 
 build/%.d: src/%.cpp
 	@echo "Deps  " $*.cpp
@@ -55,9 +57,9 @@ test: $(objects) $(tests) build/test.o
 	@echo "Link  " $@
 	@${CXX} $(flags) $^ $(libs) -o $@
 
+# Tame ASAN for https://github.com/google/sanitizers/issues/647
 run-tests: test
 	@echo "Test  " $(program)
-	# https://github.com/google/sanitizers/issues/647
 	@ASAN_OPTIONS=detect_odr_violation=1 ./$<
 
 clean:

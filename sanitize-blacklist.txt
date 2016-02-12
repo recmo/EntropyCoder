@@ -1,0 +1,7 @@
+
+# Ignore bug in libstdc++
+# https://gcc.gnu.org/bugzilla/show_bug.cgi?id=56158
+# https://llvm.org/bugs/show_bug.cgi?id=18156
+# http://lists.llvm.org/pipermail/cfe-dev/2015-January/040753.html
+# http://lists.cs.uiuc.edu/pipermail/cfe-dev/2013-January/027401.html
+src:/*/ios_base.h

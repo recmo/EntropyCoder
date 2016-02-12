@@ -26,15 +26,17 @@ Interval::Interval(double probability)
 		throw std::range_error("Probabilities must be in the range [0,1].");
 	}
 	
-	// range = round(p · 2⁶⁴) - 1
-	const long double p264 = std::exp2(64.0L);
-	const long double p = static_cast<long double>(probability);
-	range = static_cast<uint64>(round(p * p264));
-	// Subtract the 1, taking care of underflow
-	if(probability < 0.5 && range == 0) {
-		range = 1UL;
-	} else if(probability > 0.5 || range > 1) {
-		range -= 1UL;
+	if(probability < 1.0) {
+		// range = round(p · 2⁶⁴) - 1
+		const long double p264 = std::exp2(64.0L);
+		const long double p = static_cast<long double>(probability);
+		range = static_cast<uint64>(round(p * p264));
+		// Subtract the 1, taking care of underflow
+		if(probability < 0.5 && range == 0) {
+			range = 1UL;
+		} else if(probability > 0.5 || range > 1) {
+			range -= 1UL;
+		}
 	}
 	
 	// Verify

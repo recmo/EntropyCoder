@@ -3,6 +3,7 @@
 #include <sstream>
 #include <stdexcept>
 #include <iostream>
+#include <iomanip>
 using std::string;
 
 SUITE(BinaryWriter) {

@@ -131,6 +131,6 @@ bool End::is_valid(const CodeInterval& interval)
 	const std::uint64_t value = ending << 1;
 	const bool value_valid = interval.includes(value);
 	const bool carry_valid = !carry || interval.wraps();
-	const bool wrap_valid = carry == value < interval.base;
+	const bool wrap_valid = carry == (value < interval.base);
 	return value_valid && carry_valid && wrap_valid;
 }
