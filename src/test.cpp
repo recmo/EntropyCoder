@@ -96,7 +96,7 @@ void MyTestReporter::ReportSummary(
 int main(int argc, char* argv[])
 {
 	Ansi::enable();
-	cerr << "Test   " << PROGRAM << " version " << VERSION << endl;
+	cerr << "Test   " << NAME << " version " << VERSION << endl;
 	MyTestReporter myReporter;
 	UnitTest::TestRunner runner(myReporter);
 	return runner.RunTestsIf(UnitTest::Test::GetTestList(), NULL, UnitTest::True(), 0);

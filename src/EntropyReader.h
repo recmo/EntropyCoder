@@ -5,7 +5,7 @@
 #include "End.h"
 namespace EntropyCoder {
 
-class EntropyReader {
+class EXPORT EntropyReader {
 public:
 	typedef Interval::uint64 uint64;
 	EntropyReader(std::istream& input);

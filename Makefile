@@ -1,30 +1,34 @@
-program  := EntropyCoder
-packages := unittest++
+name      := EntropyCoder
+packages  := unittest++
 
-flags    += -std=c++11 -O2 -g
-sanitize ?= undefined leak
+flags     ?= -O2 -march=native -g
+sanitize  ?= undefined leak
+prefix    ?= /usr/local
 
 ################################################################################
 
-sources   := $(shell find src -name *.cpp)
+sources   := $(shell find src -name *.cpp ! -name *.test.cpp)
 headers   := $(shell find src -name *.h)
-objects   := $(patsubst src/%.cpp, build/%.o, $(sources))
-tests     := $(filter build/%.test.o,$(objects))
-objects   := $(filter-out $(tests) build/main.o build/test.o,$(objects))
+tests     := $(shell find src -name *.test.cpp)
+objects   := $(patsubst src/%.cpp,build/%.o, $(sources))
+gcda      := $(patsubst src/%.cpp,build/%.inst.gcda,$(sources) $(test))
 clang     := $(findstring clang,${CXX})
 flags     += $(if $(packages), $(shell pkg-config --cflags $(packages)))
 flags     += -DVERSION=\"$(shell git show --pretty=format:%h -q HEAD)\"
-flags     += -DPROGRAM=\"$(program)\" -Isrc -fPIE -flto -Wall -Wextra 
+flags     += -DNAME=\"$(name)\" -std=c++11 -Isrc -fPIE -Wall -Wextra 
 flags     += -Wno-unused-parameter -Werror=return-type -Werror=switch
-flags     += -ftemplate-backtrace-limit=0 $(patsubst %,-fsanitize=%,$(sanitize))
-flags     += $(if $(clang),-fsanitize-blacklist=sanitize-blacklist.txt,)
-flags     += $(if $(clang),-fprofile-arcs -ftest-coverage,--coverage)
+flags     += -ftemplate-backtrace-limit=0 -flto
+flags     += -fvisibility-inlines-hidden -fvisibility=hidden
+flags     += -DEXPORT=__attribute__\(\(visibility\(\"default\"\)\)\)
+inst      := $(patsubst %,-fsanitize=%,$(sanitize))
+inst      += $(if $(clang),-fsanitize-blacklist=sanitize-blacklist.txt,)
+inst      += $(if $(clang),-fprofile-arcs -ftest-coverage,--coverage)
 libs      += -pie -fuse-ld=gold
 libs      += $(if $(packages), $(shell pkg-config --libs $(packages)))
 pch       := $(if $(clang),-include-pch build/pch.h.gch,-include build/pch.h)
 all       :  build run-tests
-build     :  $(program) test
-coverage  :  coverage/index.html
+build     :  lib$(name).so test
+coverage  :  coverage/src/index.html
 print-%   :  ; @echo $* = $($*)
 .PHONY    :  build run-tests clean coverage
 .SECONDARY:
@@ -39,47 +43,52 @@ build/%.d: src/%.cpp
 
 build/pch.h:
 	@echo "Inc   " pch.h
-	@grep -h "#include <" $(filter-out src/test.cpp $(filter %.test.cpp,$(sources) $(headers)),$(sources) $(headers)) | sort | uniq > $@
+	@grep -h "#include <" $(filter-out src/test.cpp %.test.cpp,\
+		$(sources) $(headers)) | sort | uniq > $@
 
 build/%.h.gch: build/%.h
 	@echo "Pch   " $*.h
 	@mkdir -p $(dir $@)
-	@${CXX} $(flags) -x c++-header $< -o $@
+	@${CXX} $(filter-out -DVERSION=%,$(flags)) -x c++-header $< -o $@
 
 build/%.o: src/%.cpp build/pch.h.gch
 	@echo "C++   " $*.cpp
 	@mkdir -p $(dir $@)
 	@${CXX} $(flags) $(pch) -c $< -o $@
 
-$(program): $(objects) build/main.o
-	@echo "Link  " $@
-	@${CXX} $(flags) $^ $(libs) -o $@
+build/%.inst.o: src/%.cpp build/pch.h.gch
+	@echo "Inst  " $*.cpp
+	@mkdir -p $(dir $@)
+	@${CXX} $(flags) $(pch) $(inst) -c $< -o $@
 
-test: $(objects) $(tests) build/test.o
+lib$(name).so: $(objects)
 	@echo "Link  " $@
-	@${CXX} $(flags) $^ $(libs) -o $@
+	@${CXX} $(flags) $^ $(libs) -shared -o $@
 
-# Tame ASAN for https://github.com/google/sanitizers/issues/647
-run-tests: test
-	@echo "Test  " $(program)
-	@rm -f $(patsubst %.o,%.gcda,$(objects) $(tests))
+test: $(patsubst src/%.cpp,build/%.inst.o,$(tests)) \
+	$(patsubst %.o,%.inst.o,$(objects)) build/test.inst.o
+	@echo "Link  " $@
+	@${CXX} $(flags) $(inst) $^ $(libs) -o $@
+
+build/test: test
+	@echo "Test  " $(name)
 	@ASAN_OPTIONS=detect_odr_violation=1 ./$<
+	@touch $<
 
-build/%.gcda: build/%.o run-tests
-	@true
-
-build/lcov.info: $(patsubst %.o,%.gcda,$(objects) $(tests))
+coverage/src/index.html: build/test
 	@echo "Lcov  " test
 	@lcov --quiet --base-directory src --no-external --directory build \
-		$(if $(clang),--gcov-tool ./llvm-gcov,) --capture --output-file $@
-	@lcov --quiet --remove $@ src/*.test.cpp src/test.cpp \
-		$(if $(clang),--gcov-tool ./llvm-gcov,) --output-file $@
+		$(if $(clang),--gcov-tool ./llvm-gcov,) --capture \
+		--output-file build/lcov
+	@lcov --quiet --remove build/lcov src/*.test.cpp src/test.cpp \
+		$(if $(clang),--gcov-tool ./llvm-gcov,) --output-file build/lcov
+	@genhtml --quiet --title "$(name)" --legend --num-spaces 4 \
+		--output-directory coverage build/lcov
 
-coverage/index.html: build/lcov.info
-	@echo "Html  " test
-	@genhtml --quiet --title "$(program)" --legend --num-spaces 4 \
-		--output-directory coverage $^
+view-coverage: coverage/src/index.html
+	@echo "Open  " $^
+	@xdg-open $^
 
 clean:
-	@echo "Clean  " $(program)
-	@rm -Rf build coverage $(program) test
+	@echo "Clean  " $(name)
+	@rm -Rf build coverage lib$(name).so test

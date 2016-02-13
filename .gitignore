@@ -2,6 +2,6 @@
 build
 coverage
 test
-EntropyCoder
+libEntropyCoder.so
 *.kdev4
 

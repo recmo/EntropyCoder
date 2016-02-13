@@ -5,7 +5,7 @@
 #include "End.h"
 namespace EntropyCoder {
 
-class EntropyWriter {
+class EXPORT EntropyWriter {
 public:
 	EntropyWriter(std::ostream& output): bw(output) { }
 	~EntropyWriter();
