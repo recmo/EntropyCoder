@@ -76,4 +76,146 @@ std::pair<uint64, uint64> mul128_emu(uint64 a, uint64 b)
 	return {h, l};
 }
 
+int bsr(uint64 x)
+{
+	uint64 y;
+	uint64 r;
+
+	r = (x > 0xFFFFFFFF) << 5; x >>= r;
+	y = (x > 0xFFFF    ) << 4; x >>= y; r |= y;
+	y = (x > 0xFF      ) << 3; x >>= y; r |= y;
+	y = (x > 0xF       ) << 2; x >>= y; r |= y;
+	y = (x > 0x3       ) << 1; x >>= y; r |= y;
+
+	return static_cast<int>(r | (x >> 1));
+}
+
+std::pair<uint64, uint64> div128_emu(uint64 h, uint64 l, uint64 d)
+{
+	// Use the algorithm from:
+	// http://codereview.stackexchange.com/questions/67962/mostly-portable-128-by-64-bit-division
+	// Translate the incoming variables
+	uint64 a_hi = h;
+	uint64 a_lo = l;
+	uint64 b = d;
+	uint64 r = 0;
+	
+	uint64 p_lo;
+	uint64 p_hi;
+	uint64 q = 0;
+	
+	auto r_hi = a_hi;
+	auto r_lo = a_lo;
+	
+	int s = 0;
+	if(0 == (b >> 63)){
+		
+		// Normalize so quotient estimates are
+		// no more than 2 in error.
+		
+		// Note: If any bits get shifted out of
+		// r_hi at this point, the result would
+		// overflow.
+		
+		s = 63 - bsr(b);
+		const auto t = 64 - s;
+		
+		b <<= s;
+		r_hi = (r_hi << s)|(r_lo >> t);
+		r_lo <<= s;
+	}
+	
+	const auto b_hi = b >> 32;
+	
+	/*
+	The first full-by-half division places b
+	across r_hi and r_lo, making the reduction
+	step a little complicated.
+	
+	To make this easier, u_hi and u_lo will hold
+	a shifted image of the remainder.
+	
+	[u_hi||    ][u_lo||    ]
+			[r_hi||    ][r_lo||    ]
+					[ b  ||    ]
+	[p_hi||    ][p_lo||    ]
+					|
+					V
+					[q_hi||    ]
+	*/
+	
+	auto q_hat = r_hi / b_hi;
+	
+	std::tie(p_hi, p_lo) = mul128(b, q_hat);
+	
+	const auto u_hi = r_hi >> 32;
+	const auto u_lo = (r_hi << 32)|(r_lo >> 32);
+	
+	// r -= b*q_hat
+	//
+	// At most 2 iterations of this...
+	while(
+		(p_hi > u_hi) ||
+		((p_hi == u_hi) && (p_lo > u_lo))
+		)
+	{
+		if(p_lo < b){
+			--p_hi;
+		}
+		p_lo -= b;
+		--q_hat;
+	}
+	
+	auto w_lo = (p_lo << 32);
+	auto w_hi = (p_hi << 32)|(p_lo >> 32);
+	
+	if(w_lo > r_lo){
+		++w_hi;
+	}
+	
+	r_lo -= w_lo;
+	r_hi -= w_hi;
+	
+	q = q_hat << 32;
+	
+	/*
+	The lower half of the quotient is easier,
+	as b is now aligned with r_lo.
+	
+			|r_hi][r_lo||    ]
+					[ b  ||    ]
+	[p_hi||    ][p_lo||    ]
+							|
+							V
+					[q_hi||q_lo]
+	*/
+	
+	q_hat = ((r_hi << 32)|(r_lo >> 32)) / b_hi;
+	
+	std::tie(p_hi, p_lo) = mul128(b, q_hat);
+	
+	// r -= b*q_hat
+	//
+	// ...and at most 2 iterations of this.
+	while(
+		(p_hi > r_hi) ||
+		((p_hi == r_hi) && (p_lo > r_lo))
+		)
+	{
+		if(p_lo < b){
+			--p_hi;
+		}
+		p_lo -= b;
+		--q_hat;
+	}
+	
+	r_lo -= p_lo;
+	
+	q |= q_hat;
+	
+	r = r_lo >> s;
+
+	return {q, r};
+}
+
 } // namespace EntropyCoder

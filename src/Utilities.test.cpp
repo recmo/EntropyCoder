@@ -14,14 +14,16 @@ std::ostream& operator<<(std::ostream& out, const std::pair<std::uint64_t, std::
 
 namespace EntropyCoder {
 	std::pair<std::uint64_t, std::uint64_t> mul128_emu(std::uint64_t a, std::uint64_t b);
+	std::pair<std::uint64_t, std::uint64_t> div128_emu(std::uint64_t h, std::uint64_t l, std::uint64_t d);
 }
 
 SUITE(Utilities) {
 using EntropyCoder::count_leading_zeros;
 using EntropyCoder::add128;
-using EntropyCoder::div128;
 using EntropyCoder::mul128;
 using EntropyCoder::mul128_emu;
+using EntropyCoder::div128;
+using EntropyCoder::div128_emu;
 
 // Nine special values
 const std::uint64_t c0 = 0x0000000000000000UL;
@@ -74,13 +76,14 @@ TEST(MultiplyDivideAdd)
 			CHECK_EQUAL(result, mul128_emu(a, b));
 			
 			// Divide
-			// TODO add _emu
 			CHECK_THROW(div128(h, l, 0), std::runtime_error);
 			if(a != 0) {
 				CHECK_EQUAL(std::make_pair(b, 0UL), div128(h, l, a));
+				CHECK_EQUAL(std::make_pair(b, 0UL), div128_emu(h, l, a));
 			}
 			if(b != 0) {
 				CHECK_EQUAL(std::make_pair(a, 0UL), div128(h, l, b));
+				CHECK_EQUAL(std::make_pair(a, 0UL), div128_emu(h, l, b));
 			}
 			
 			for(const std::uint64_t c: all_values) {
@@ -98,6 +101,7 @@ TEST(MultiplyDivideAdd)
 						// TODO CHECK_THROW
 					} else {
 						CHECK_EQUAL(std::make_pair(b + c / a, c % a), div128(h2, l2, a));
+						CHECK_EQUAL(std::make_pair(b + c / a, c % a), div128_emu(h2, l2, a));
 					}
 				}
 				if(b != 0) {
@@ -105,6 +109,7 @@ TEST(MultiplyDivideAdd)
 						// TODO CHECK_THROW
 					} else {
 						CHECK_EQUAL(std::make_pair(a + c / b, c % b), div128(h2, l2, b));
+						CHECK_EQUAL(std::make_pair(a + c / b, c % b), div128_emu(h2, l2, b));
 					}
 				}
 			}
