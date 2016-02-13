@@ -1,25 +1,21 @@
 #pragma once
-#include <cstdint>
-#include "BinaryReader.h"
-#include "CodeInterval.h"
-#include "End.h"
+#include <iostream>
+#include <memory>
+#include "Interval.h"
 namespace EntropyCoder {
 
 class EXPORT EntropyReader {
 public:
-	typedef Interval::uint64 uint64;
 	EntropyReader(std::istream& input);
+	~EntropyReader();
 	
 	bool eof() const;
-	uint64 read() const;
+	std::uint64_t read() const;
 	void read(const Interval& symbol);
 	
 private:
-	BinaryReader br;
-	CodeInterval current;
-	Interval::uint64 value;
-	End end;
-	uint64 past_end = 0;
+	class Implementation;
+	std::unique_ptr<Implementation> impl;
 };
 
 } // namespace EntropyCoder

@@ -1,21 +1,19 @@
 #pragma once
-#include <cstdint>
-#include "BinaryWriter.h"
-#include "CodeInterval.h"
-#include "End.h"
+#include <iostream>
+#include <memory>
+#include "Interval.h"
 namespace EntropyCoder {
 
 class EXPORT EntropyWriter {
 public:
-	EntropyWriter(std::ostream& output): bw(output) { }
+	EntropyWriter(std::ostream& output);
 	~EntropyWriter();
 	
 	void write(const Interval& symbol);
 	
 private:
-	BinaryWriter bw;
-	CodeInterval current;
-	End end;
+	class Implementation;
+	std::unique_ptr<Implementation> impl;
 };
 
 } // namespace EntropyCoder

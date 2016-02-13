@@ -1,5 +1,9 @@
 #include "EntropyReader.h"
+#include "BinaryReader.h"
+#include "CodeInterval.h"
 #include "Utilities.h"
+#include "End.h"
+#include <cstdint>
 #include <cassert>
 #include <iostream>
 #include <iomanip>
@@ -7,7 +11,53 @@ namespace EntropyCoder {
 
 constexpr bool print = false;
 
+/******************************************************************************/
+
+class EntropyReader::Implementation {
+public:
+	Implementation(std::istream& input);
+	
+	bool eof() const;
+	std::uint64_t read() const;
+	void read(const Interval& symbol);
+	
+private:
+	BinaryReader br;
+	CodeInterval current;
+	Interval::uint64 value;
+	End end;
+	std::uint64_t past_end = 0;
+};
+
 EntropyReader::EntropyReader(std::istream& input)
+: impl{new Implementation{input}}
+{
+}
+
+EntropyReader::~EntropyReader()
+{
+	// Needs to be here because ~unique_ptr<Implementation>() needs to see
+	// the Implementation class.
+}
+
+bool EntropyReader::eof() const
+{
+	return impl->eof();
+}
+
+std::uint64_t EntropyReader::read() const
+{
+	return impl->read();
+}
+
+void EntropyReader::read(const Interval& symbol)
+{
+	return impl->read(symbol);
+}
+
+/******************************************************************************/
+
+EntropyReader::Implementation::Implementation(std::istream& input)
 : br(input)
 {
 	for(uint i = 0; i < Interval::bits; ++i) {
@@ -18,7 +68,7 @@ EntropyReader::EntropyReader(std::istream& input)
 	}
 }
 
-bool EntropyReader::eof() const
+bool EntropyReader::Implementation::eof() const
 {
 	if(!br.eof()) {
 		return false;
@@ -26,9 +76,9 @@ bool EntropyReader::eof() const
 	return value == end.value_bits();
 }
 
-EntropyReader::uint64 EntropyReader::read() const
+std::uint64_t EntropyReader::Implementation::read() const
 {
-	uint64 descaled = current.descale(value);
+	std::uint64_t descaled = current.descale(value);
 	if(print) std::cerr << "READ " << current << " ";
 	if(print) std::cerr << "0x" << std::setw(16) << std::setfill('0') << std::hex;
 	if(print) std::cerr << value << " ";
@@ -37,7 +87,7 @@ EntropyReader::uint64 EntropyReader::read() const
 	return current.descale(value);
 }
 
-void EntropyReader::read(const Interval& symbol)
+void EntropyReader::Implementation::read(const Interval& symbol)
 {
 	end.next();
 	if(current.update(symbol)) {
@@ -60,7 +110,7 @@ void EntropyReader::read(const Interval& symbol)
 			
 			// TODO: what is the right limit here? 100 was not enough for a simple
 			// case like
-			// echo -e "true\nfalse\ntrue\ntrue" | ./EntropyCoder roundtrip -p 1e-15
+			// echo -e "true\nfalse\ntrue\ntrue"|./EntropyCoder roundtrip -p 1e-15
 			// Why would a thousand be enough?
 			assert(past_end < 1000);
 		}

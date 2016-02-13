@@ -1,4 +1,7 @@
 #include "EntropyWriter.h"
+#include "BinaryWriter.h"
+#include "CodeInterval.h"
+#include "End.h"
 #include <cassert>
 #include <iostream>
 #include <iomanip>
@@ -6,10 +9,47 @@
 namespace EntropyCoder {
 
 constexpr bool print = false;
-
 typedef std::uint64_t uint64;
 
+/******************************************************************************/
+
+class EntropyWriter::Implementation {
+public:
+	Implementation(std::ostream& output);
+	~Implementation();
+	
+	void write(const Interval& symbol);
+	
+private:
+	BinaryWriter bw;
+	CodeInterval current;
+	End end;
+};
+
+EntropyWriter::EntropyWriter(std::ostream& output)
+: impl{new Implementation{output}}
+{
+}
+
 EntropyWriter::~EntropyWriter()
+{
+	// Needs to be here because ~unique_ptr<Implementation>() needs to see
+	// the Implementation class.
+}
+
+void EntropyWriter::write(const Interval& symbol)
+{
+	impl->write(symbol);
+}
+
+/******************************************************************************/
+
+EntropyWriter::Implementation::Implementation(std::ostream& output)
+: bw(output)
+{
+}
+
+EntropyWriter::Implementation::~Implementation()
 {
 	if(end.carry_bit()) {
 		bw.add_carry();
@@ -25,7 +65,7 @@ EntropyWriter::~EntropyWriter()
 	}
 }
 
-void EntropyWriter::write(const Interval& symbol)
+void EntropyWriter::Implementation::write(const Interval& symbol)
 {
 	if(print) std::cerr << "WRITE " << current << " " << symbol << "\n";
 	
