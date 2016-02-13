@@ -40,7 +40,7 @@ bool CodeInterval::update(const Interval& symbol)
 	}
 	
 	// Check the incoming range:
-	if(symbol.range == 0 || symbol.base + symbol.range < symbol.base) {
+	if(symbol.range < 3 || symbol.base + symbol.range < symbol.base) {
 		throw std::range_error("Invalid symbol interval.");
 	}
 	

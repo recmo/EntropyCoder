@@ -7,7 +7,14 @@
 SUITE(Interval) {
 using EntropyCoder::Interval;
 
-const Interval smallest{0x0000000000000000UL, 0x0000000000000001UL};
+std::string to_string(const Interval& end)
+{
+	std::ostringstream out;
+	out << end;
+	return out.str();
+}
+
+const Interval smallest{0x0000000000000000UL, 0x0000000000000003UL};
 const Interval largest{0x0000000000000000UL, 0xFFFFFFFFFFFFFFFFUL};
 const Interval half1{0x0000000000000000UL, 0x7FFFFFFFFFFFFFFFUL};
 const Interval half2{0x8000000000000000UL, 0x7FFFFFFFFFFFFFFFUL};
@@ -15,10 +22,20 @@ const Interval half2{0x8000000000000000UL, 0x7FFFFFFFFFFFFFFFUL};
 const Interval min_norm1{0x0000000000000000UL, 0x8000000000000000UL};
 const Interval min_norm2{0x7FFFFFFFFFFFFFFFUL, 0x8000000000000000UL};
 
+TEST(ToString)
+{
+	CHECK_EQUAL("[0.0000000000000000, 0.0000000000000004)", to_string(smallest));
+	CHECK_EQUAL("[0.0000000000000000, 1.0000000000000000)", to_string(largest));
+	CHECK_EQUAL("[0.0000000000000000, 0.8000000000000000)", to_string(half1));
+	CHECK_EQUAL("[0.8000000000000000, 1.0000000000000000)", to_string(half2));
+	CHECK_EQUAL("[0.0000000000000000, 0.8000000000000001)", to_string(min_norm1));
+	CHECK_EQUAL("[0.7fffffffffffffff, 1.0000000000000000)", to_string(min_norm2));
+}
+
 TEST(LiteralRanges)
 {
 	CHECK_EQUAL(0x0000000000000000UL, smallest.base);
-	CHECK_EQUAL(0x0000000000000001UL, smallest.range);
+	CHECK_EQUAL(0x0000000000000003UL, smallest.range);
 	CHECK_EQUAL(0x0000000000000000UL, largest.base);
 	CHECK_EQUAL(0xFFFFFFFFFFFFFFFFUL, largest.range);
 	CHECK_EQUAL(0x0000000000000000UL, half1.base);
@@ -82,11 +99,12 @@ TEST(ExactProbabilitiesSmall)
 	CHECK_EQUAL((Interval{0, 0x000000000000FFFFUL}), Interval{std::exp2(-48)});
 	CHECK_EQUAL((Interval{0, 0x00000000000000FFUL}), Interval{std::exp2(-56)});
 	CHECK_EQUAL((Interval{0, 0x000000000000000FUL}), Interval{std::exp2(-60)});
-	CHECK_EQUAL((Interval{0, 0x0000000000000001UL}), Interval{std::exp2(-63)});
+	CHECK_EQUAL((Interval{0, 0x0000000000000003UL}), Interval{std::exp2(-62)});
 }
 
 TEST(ProbabilityUnderflow)
 {
+	CHECK_EQUAL(smallest, Interval{std::exp2(-63)});
 	CHECK_EQUAL(smallest, Interval{std::exp2(-64)});
 	CHECK_EQUAL(smallest, Interval{std::exp2(-65)});
 	CHECK_EQUAL(smallest, Interval{std::exp2(-128)});
@@ -128,7 +146,7 @@ TEST(GetProbability)
 	CHECK_EQUAL(std::exp2(-48), Interval{std::exp2(-48)}.probability());
 	CHECK_EQUAL(std::exp2(-56), Interval{std::exp2(-56)}.probability());
 	CHECK_EQUAL(std::exp2(-60), Interval{std::exp2(-60)}.probability());
-	CHECK_EQUAL(std::exp2(-63), Interval{std::exp2(-63)}.probability());
+	CHECK_EQUAL(std::exp2(-62), Interval{std::exp2(-62)}.probability());
 }
 
 TEST(GetEntropy)

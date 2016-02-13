@@ -29,20 +29,20 @@ Interval::Interval(double probability)
 	}
 	
 	if(probability < 1.0) {
-		// range = round(p · 2⁶⁴) - 1
+		// range = min(3, round(p · 2⁶⁴) - 1)
 		const long double p264 = std::exp2(64.0L);
 		const long double p = static_cast<long double>(probability);
 		range = static_cast<uint64>(round(p * p264));
 		// Subtract the 1, taking care of underflow
-		if(probability < 0.5 && range == 0) {
-			range = 1UL;
-		} else if(probability > 0.5 || range > 1) {
+		if(probability < 0.5 && range < 3) {
+			range = 3UL;
+		} else if(probability > 0.5 || range > 3) {
 			range -= 1UL;
 		}
 	}
 	
 	// Verify
-	assert(range >= 1);
+	assert(range >= 3);
 	assert(base + range >= base);
 }
 
@@ -50,12 +50,12 @@ Interval::Interval(uint64 _base, uint64 _range)
 : base(_base)
 , range(_range)
 {
-	if(range == 0 || base + range < range) {
-		throw std::range_error("Invalid range, range must be > 0 and base + range must be < 2^64.");
+	if(range < 3 || base + range < range) {
+		throw std::range_error("Invalid range, range must be > 2 and base + range must be < 2^64.");
 	}
 	
 	// Verify
-	assert(range >= 1);
+	assert(range >= 3);
 	assert(base + range >= base);
 }
 
