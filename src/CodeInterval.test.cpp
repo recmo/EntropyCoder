@@ -31,10 +31,10 @@ const std::uint64_t cA = 0xAAAAAAAAAAAAAAAAUL;
 const std::uint64_t cE = 0xFFFFFFFFFFFFFFFEUL;
 const std::uint64_t cF = 0xFFFFFFFFFFFFFFFFUL;
 const std::vector<std::uint64_t> all_values{
-	c0, c1, c5, c7, c8, c9, cA, cE, cF
+	c0, c1, c2, c3, c5, c7, c8, c9, cA, cE, cF
 };
 
-// Create 9 × 9 = 81 special intervals
+// Create 11 × 11 = 121 special intervals
 #define I(a,b) const Interval i##a##b = UnsafeInterval{c##a,c##b};
 #define R(a) I(a,0) I(a,1) I(a,2) I(a,3) I(a,5) I(a,7) I(a,8) I(a,9) I(a,A) I(a,E) I(a,F)
 R(0) R(1) R(2) R(3) R(5) R(7) R(8) R(9) R(A) R(E) R(F)
@@ -139,13 +139,13 @@ struct GeneratedTest {
 	std::uint8_t symbols_index;
 	bool carry;
 };
+GeneratedTest tests[] = {
+	#include "CodeInterval.test.py.out"
+};
+const uint num_tests = sizeof(tests) / sizeof(GeneratedTest);
 
 TEST(UpdateGeneratedTests)
 {
-	GeneratedTest tests[] = {
-		#include "CodeInterval.test.py.out"
-	};
-	const uint num_tests = sizeof(tests) / sizeof(GeneratedTest);
 	for(uint test_index = 0; test_index < num_tests; ++test_index) {
 		const GeneratedTest& test = tests[test_index];
 		CodeInterval code = normalized.at(test.normalized_index);
