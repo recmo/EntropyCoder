@@ -11,6 +11,8 @@ uint64 count_leading_zeros(uint64 value)
 		return 64;
 	}
 	return __builtin_clzll(value);
+	
+	/// TODO count_leading_zeros_emu
 }
 
 std::pair<uint64, uint64> add128(uint64 h, uint64 l, uint64 n)
@@ -76,20 +78,6 @@ std::pair<uint64, uint64> mul128_emu(uint64 a, uint64 b)
 	return {h, l};
 }
 
-int bsr(uint64 x)
-{
-	uint64 y;
-	uint64 r;
-
-	r = (x > 0xFFFFFFFF) << 5; x >>= r;
-	y = (x > 0xFFFF    ) << 4; x >>= y; r |= y;
-	y = (x > 0xFF      ) << 3; x >>= y; r |= y;
-	y = (x > 0xF       ) << 2; x >>= y; r |= y;
-	y = (x > 0x3       ) << 1; x >>= y; r |= y;
-
-	return static_cast<int>(r | (x >> 1));
-}
-
 std::pair<uint64, uint64> div128_emu(uint64 h, uint64 l, uint64 d)
 {
 	// Use the algorithm from:
@@ -117,7 +105,7 @@ std::pair<uint64, uint64> div128_emu(uint64 h, uint64 l, uint64 d)
 		// r_hi at this point, the result would
 		// overflow.
 		
-		s = 63 - bsr(b);
+		s = count_leading_zeros(b);
 		const auto t = 64 - s;
 		
 		b <<= s;

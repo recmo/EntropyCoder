@@ -29,6 +29,7 @@ pch       := $(if $(clang),-include-pch build/pch.h.gch,-include build/pch.h)
 all       :  build run-tests
 build     :  lib$(name).so test
 coverage  :  coverage/src/index.html
+run-tests :  build/test
 print-%   :  ; @echo $* = $($*)
 .PHONY    :  build run-tests clean coverage
 .SECONDARY:

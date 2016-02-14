@@ -76,22 +76,60 @@ double Interval::entropy() const
 
 bool Interval::includes(Interval::uint64 value) const
 {
+	// If base + range overflows it is interpreted as wrapping around 2⁶⁴.
 	uint64 top = base + range + 1;
-	if(top <= base) {
-		return value >= base || value < top;
-	} else {
+	if(top > base) {
 		return value >= base && value < top;
+	} else {
+		return value >= base || value < top;
 	}
 }
 
 bool Interval::includes(const Interval& interval) const
 {
-	return interval.base >= base && interval.base + interval.range <= base + range;
+	// [l',h') ∊ [l,h) ⇔ l ≤ l' ∧ h' ≤ h
+	// [b',b'+r'+1) ∊ [b,b+r+1) ⇔ b ≤ b' ∧ b'+r' ≤ b+r
+	
+	// b ≤ b'
+	if(base > interval.base) {
+		return false;
+	}
+	
+	// b'+r' ≤ b+r
+	// If base + range overflows it is interpreted as extending beyond 2⁶⁴.
+	const uint64 top = base + range;
+	const uint64 itop = interval.base + interval.range;
+	const bool overflow = top < base;
+	const bool ioverflow = itop < interval.base;
+	if(overflow == ioverflow) {
+		return itop <= top;
+	} else {
+		return overflow;
+	}
 }
 
 bool Interval::overlaps(const Interval& interval) const
 {
-	return includes(interval.base) && !includes(interval);
+	// Ensure base ≤ interval.base
+	if(base > interval.base) {
+		return interval.overlaps(*this);
+	}
+	assert(base <= interval.base);
+	
+	// Given base ≤ interval.base we have overlaps ⇔ interval.base ∊ [h,l)
+	// If base + range overflows it is interpreted as extending beyond 2⁶⁴.
+	const uint64 top = base + range + 1;
+	const bool overflows = top <= base;
+	if(!overflows) {
+		return interval.base < top;
+	} else {
+		return true;
+	}
+}
+
+bool Interval::disjoint(const Interval& interval) const
+{
+	return !overlaps(interval);
 }
 
 } // namespace EntropyCoder

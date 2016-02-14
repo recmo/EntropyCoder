@@ -157,23 +157,44 @@ TEST(UpdateGeneratedTests)
 	}
 }
 
-TEST(Update)
+TEST(UpdateSubInterval)
 {
-	/*
-	for(const CodeInterval& interval: normalized) {
+	for(const CodeInterval& original: normalized) {
 		for(const Interval& symbol: valid_symbols) {
-			CodeInterval updated = interval;
+			CodeInterval updated = original;
 			const bool carry = updated.update(symbol);
-			//CHECK(interval.includes(updated));
-			if(!interval.wraps()) {
-				CHECK(!carry);
-				CHECK(!updated.wraps());
+			if(!carry) {
+				CHECK(original.includes(updated));
 			} else {
-				// TODO
+				CHECK(original.wraps());
+				const CodeInterval wrapped = UnsafeInterval{0,
+					original.range + original.base /* - 2⁶⁴ */};
+				CHECK(wrapped.includes(updated));
 			}
-			
 		}
-		// TODO Check non-overlapping sub-intervals
+	}
+}
+
+TEST(UpdateDisjointIntervals)
+{
+	for(const CodeInterval& original: normalized) {
+		std::vector<CodeInterval> updated{valid_symbols.size(), original};
+		for(uint i = 0; i < updated.size(); ++i) {
+			updated[i].update(valid_symbols[i]);
+		}
+		for(uint i = 0; i < updated.size(); ++i) {
+			for(uint j = 0; j < updated.size(); ++j) {
+				if(valid_symbols[i].disjoint(valid_symbols[j])) {
+					CHECK(updated[i].disjoint(updated[j]));
+				}
+			}
+		}
+	}
+}
+
+TEST(UpdateExceptions)
+{
+	for(const CodeInterval& interval: normalized) {
 		
 		// Invalid symbols
 		for(const Interval& symbol: invalid_symbols) {
@@ -189,7 +210,6 @@ TEST(Update)
 			CHECK_THROW(updated.update(symbol), std::range_error);
 		}
 	}
-	*/
 }
 
 TEST(UpdateLargestIdentity)
@@ -203,23 +223,49 @@ TEST(UpdateLargestIdentity)
 	}
 }
 
-TEST(Descale)
+TEST(DescaleIncludes)
 {
-	for(const CodeInterval& interval: normalized) {
-		for(const Interval::uint64 value: all_values) {
-			if(interval.includes(value)) {
-				interval.descale(value);
-				
-				// TODO Scale and descale roundtrip.
-				
-			} else {
-				CHECK_THROW(interval.descale(value), std::range_error);
-			}
+	for(const CodeInterval& original: normalized) {
+		for(const Interval& symbol: valid_symbols) {
+			CodeInterval updated = original;
+			updated.update(symbol);
+			
+			// Take the lowest and highest values from the updated range
+			const std::uint64_t lowest = updated.base;
+			const std::uint64_t highest = updated.base + updated.range;
+			
+			// Descale them
+			const std::uint64_t dlowest = original.descale(lowest);
+			const std::uint64_t dhighest = original.descale(highest);
+			
+			// Check that they are included in the symbol
+			CHECK(symbol.includes(dlowest));
+			CHECK(symbol.includes(dhighest));
 		}
 	}
-	for(const CodeInterval& interval: non_normalized) {
-		for(const Interval::uint64 value: all_values) {
-			CHECK_THROW(interval.descale(value), std::range_error);
+}
+
+TEST(DescaleDisjoint)
+{
+	for(const CodeInterval& original: normalized) {
+		for(const Interval& symbol: valid_symbols) {
+			CodeInterval updated = original;
+			updated.update(symbol);
+			
+			// Take the lowest and highest values from the updated range
+			const std::uint64_t lowest = updated.base;
+			const std::uint64_t highest = updated.base + updated.range;
+			
+			// Descale them
+			const std::uint64_t dlowest = original.descale(lowest);
+			const std::uint64_t dhighest = original.descale(highest);
+			
+			for(const Interval& other: valid_symbols) {
+				if(!symbol.overlaps(other)) {
+					CHECK(!other.includes(dlowest));
+					CHECK(!other.includes(dhighest));
+				}
+			}
 		}
 	}
 }
@@ -232,17 +278,23 @@ TEST(DescaleLargestIdentity)
 	}
 }
 
-TEST(DescaleSmallest)
+TEST(DescaleExceptions)
 {
-	const CodeInterval smallest = i08;
-	CHECK_EQUAL(0x0000000000000000UL, smallest.descale(0x0000000000000000UL));
-	CHECK_EQUAL(0xAAAAAAAAAAAAAAA8UL, smallest.descale(0x5555555555555555UL));
-	CHECK_EQUAL(0xFFFFFFFFFFFFFFFEUL, smallest.descale(0x8000000000000000UL));
-	CHECK_THROW(smallest.descale(0xAAAAAAAAAAAAAAAAUL), std::range_error);
-	CHECK_THROW(smallest.descale(0xFFFFFFFFFFFFFFFFUL), std::range_error);
+	for(CodeInterval original: non_normalized) {
+		for(std::uint64_t value: all_values) {
+			CHECK_THROW(original.descale(value), std::range_error);
+		}
+	}
+	for(CodeInterval original: normalized) {
+		for(std::uint64_t value: all_values) {
+			if(!original.includes(value)) {
+				CHECK_THROW(original.descale(value), std::range_error);
+			}
+		}
+	}
 }
 
-TEST(normalize)
+TEST(Normalize)
 {
 	for(CodeInterval interval: normalized) {
 		auto result = interval.normalize();

@@ -23,7 +23,6 @@ private:
 	
 	// If we end on 0x00 0x80*, append a final 0x80
 	bool append = false;
-	bool byte_eof() const;
 	uint8 read_byte();
 };
 

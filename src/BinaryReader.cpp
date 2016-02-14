@@ -14,7 +14,8 @@ bool BinaryReader::eof() const
 	static_assert(buffer_size == 8, "This code assumes one byte buffers.");
 	const uint8_t remaining_mask = mask == 0 ? 0 : mask | (mask - 1);
 	const bool bits_remaing_in_buffer = (buffer & remaining_mask) != 0;
-	return !bits_remaing_in_buffer && byte_eof();
+	const bool byte_eof = in.eof() && !append;
+	return !bits_remaing_in_buffer && byte_eof;
 }
 
 bool BinaryReader::read_bit()
@@ -32,11 +33,6 @@ bool BinaryReader::read_bit()
 	bool bit = (buffer & mask) != 0;
 	mask >>= 1;
 	return bit;
-}
-
-bool BinaryReader::byte_eof() const
-{
-	return in.eof() && !append;
 }
 
 BinaryReader::uint8 BinaryReader::read_byte()

@@ -23,9 +23,11 @@ public:
 	bool operator!=(const Interval& other) const { return !(*this == other); }
 	double probability() const;
 	double entropy() const;
+	
 	bool includes(uint64 value) const;
 	bool includes(const Interval& interval) const;
 	bool overlaps(const Interval& interval) const;
+	bool disjoint(const Interval& interval) const;
 };
 
 std::ostream& operator<<(std::ostream& out, const Interval& interval);
