@@ -4,9 +4,7 @@ compiler:
    - gcc
 env:
    -
-   - sanitize="undefined address"
-   - sanitize="undefined memory"
-   - sanitize="undefined thread"
+   - sanitize="undefined leak" target="check"
 
 # Travis by default uses Clang version 3.4, which is to old for us.
 addons:
@@ -24,6 +22,7 @@ install:
 before_script:
     - git clone https://github.com/unittest-cpp/unittest-cpp.git
     - pushd unittest-cpp && cmake . -DCMAKE_INSTALL_PREFIX=/usr/local -DCMAKE_CXX_FLAGS="-fPIE" && make VERBOSE=1 && sudo make install && popd
-script: make SHELL="/bin/sh -x"
-
-
+    - mkdir -p /usr/local/lib/pkgconfig
+    - echo "Libs: -L/usr/local/lib -lUnitTest++" > /usr/local/lib/pkgconfig/unittest++.pc
+    - echo "Cflags: -I/usr/local/include/UnitTest++" >> /usr/local/lib/pkgconfig/unittest++.pc
+script: make SHELL="/bin/sh -x" $target
