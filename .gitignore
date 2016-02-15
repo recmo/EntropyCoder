@@ -4,4 +4,4 @@ coverage
 test
 libEntropyCoder.so
 *.kdev4
-
+__pycache__
