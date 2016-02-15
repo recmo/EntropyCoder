@@ -5,7 +5,7 @@
 namespace EntropyCoder {
 
 // The represented interval is [base · 2⁻⁶⁴, (base + range + 1) · 2⁻⁶⁴)
-class EXPORT Interval {
+class Interval {
 public:
 	typedef std::uint64_t uint64;
 	static constexpr int bits = 8 * sizeof(uint64);

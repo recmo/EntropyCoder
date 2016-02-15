@@ -1,4 +1,5 @@
 #include "EntropyWriter.h"
+#include "Interval.h"
 #include <UnitTest++.h>
 #include <sstream>
 #include <cassert>
@@ -98,7 +99,7 @@ TEST(OneSymbol)
 		CHECK(out.good());
 		{
 			EntropyWriter bw(out);
-			bw.write(a);
+			bw.write(a.base, a.base + a.range);
 		}
 		out.flush();
 		CHECK(out.good());
@@ -114,8 +115,8 @@ TEST(TwoSymbols)
 			CHECK(out.good());
 			{
 				EntropyWriter bw(out);
-				bw.write(a);
-				bw.write(b);
+				bw.write(a.base, a.base + a.range);
+				bw.write(b.base, b.base + b.range);
 			}
 			out.flush();
 			CHECK(out.good());
@@ -132,7 +133,7 @@ TEST(ThousandSymbols)
 		{
 			EntropyWriter bw(out);
 			for(uint i = 0; i < 1000; ++i) {
-				bw.write(a);
+				bw.write(a.base, a.base + a.range);
 			}
 		}
 		out.flush();
@@ -149,10 +150,10 @@ TEST(TwoThousandSymbols)
 			{
 				EntropyWriter bw(out);
 				for(uint i = 0; i < 1000; ++i) {
-					bw.write(a);
+					bw.write(a.base, a.base + a.range);
 				}
 				for(uint i = 0; i < 1000; ++i) {
-					bw.write(b);
+					bw.write(b.base, b.base + b.range);
 				}
 			}
 			out.flush();
@@ -170,8 +171,8 @@ TEST(TwoThousandAlternatingSymbols)
 			{
 				EntropyWriter bw(out);
 				for(uint i = 0; i < 1000; ++i) {
-					bw.write(a);
-					bw.write(b);
+					bw.write(a.base, a.base + a.range);
+					bw.write(b.base, b.base + b.range);
 				}
 			}
 			out.flush();

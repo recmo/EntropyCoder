@@ -37,9 +37,9 @@ EntropyWriter::~EntropyWriter()
 	// the Implementation class.
 }
 
-void EntropyWriter::write(const Interval& symbol)
+void EntropyWriter::write(const uint64_t start, const uint64_t end)
 {
-	impl->write(symbol);
+	impl->write(Interval{start, end - start});
 }
 
 /******************************************************************************/

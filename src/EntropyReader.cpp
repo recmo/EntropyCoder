@@ -45,14 +45,14 @@ bool EntropyReader::eof() const
 	return impl->eof();
 }
 
-std::uint64_t EntropyReader::read() const
+std::uint64_t EntropyReader::value() const
 {
 	return impl->read();
 }
 
-void EntropyReader::read(const Interval& symbol)
+void EntropyReader::next(const uint64_t start, const uint64_t end)
 {
-	return impl->read(symbol);
+	return impl->read(Interval{start, end - start});
 }
 
 /******************************************************************************/

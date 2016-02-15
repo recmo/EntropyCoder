@@ -1,7 +1,7 @@
 #pragma once
 #include <iostream>
 #include <memory>
-#include "Interval.h"
+#include <cstdint>
 namespace EntropyCoder {
 
 class EXPORT EntropyWriter {
@@ -9,7 +9,7 @@ public:
 	EntropyWriter(std::ostream& output);
 	~EntropyWriter();
 	
-	void write(const Interval& symbol);
+	void write(const std::uint64_t start, const std::uint64_t end);
 	
 private:
 	class Implementation;
