@@ -1,28 +1,17 @@
 language: cpp
-compiler:
-   - clang
-   - gcc
 env:
    -
    - sanitize="undefined leak" target="check"
 
-# Travis by default uses Clang version 3.4, which is to old for us.
-addons:
-    apt:
-        sources:
-            - llvm-toolchain-precise
-            - ubuntu-toolchain-r-test
-        packages:
-            - clang-3.8
-            - g++-5
-            - gcc-5
-install:
-    - if [ "$CXX" = "g++" ]; then export CXX="g++-5" CC="gcc-5"; fi
-    - if [ "$CXX" = "clang++" ]; then export CXX="clang++-3.8" CC="clang-3.8"; fi
 before_script:
     - git clone https://github.com/unittest-cpp/unittest-cpp.git
-    - pushd unittest-cpp && cmake . -DCMAKE_INSTALL_PREFIX=/usr/local -DCMAKE_CXX_FLAGS="-fPIE" && make VERBOSE=1 && sudo make install && popd
-    - mkdir -p /usr/local/lib/pkgconfig
-    - echo "Libs: -L/usr/local/lib -lUnitTest++" > /usr/local/lib/pkgconfig/unittest++.pc
-    - echo "Cflags: -I/usr/local/include/UnitTest++" >> /usr/local/lib/pkgconfig/unittest++.pc
+    - pushd unittest-cpp
+    - cmake . -DCMAKE_INSTALL_PREFIX=/usr/local -DCMAKE_CXX_FLAGS="-fPIE"
+    - make VERBOSE=1
+    - echo TmFtZTogVW5pdFRlc3QrKwpEZXNjcmlwdGlvbjogVW5pdFRlc3QrKyBpcyBhIHNpbXBsZSBDKysgVW5pdCBUZXN0IEZyYW1ld29yawpVUkw6IGh0dHBzOi8vZ2l0aHViLmNvbS91bml0dGVzdC1jcHAvdW5pdHRlc3QtY3BwClZlcnNpb246IDEuNS4xCkxpYnM6IC1ML3Vzci9sb2NhbC9saWIgLWxVbml0VGVzdCsrCkNmbGFnczogLUkvdXNyL2xvY2FsL2luY2x1ZGUvVW5pdFRlc3QrKwo= > unittest++.pc
+    - sudo make install
+    - sudo install unittest++.pc -D /usr/local/lib/pkgconfig/unittest++.pc
+    - sudo install -D UnitTest++/UnitTest++.h /usr/local/include/UnitTest++/UnitTest++.h
+    - popd
+    - pkg-config --debug --print-errors --cflags --libs unittest++
 script: make SHELL="/bin/sh -x" $target
