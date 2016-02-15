@@ -6,12 +6,14 @@ namespace EntropyCoder {
 
 class VISIBLE EntropyReader {
 public:
-	EntropyReader(std::istream& input);
-	~EntropyReader();
+	typedef std::ios_base::failure io_error;
 	
-	bool eof() const;
-	std::uint64_t value() const;
-	void next(const std::uint64_t start, const std::uint64_t end);
+	EntropyReader(std::istream& input) throw(std::bad_alloc, io_error);
+	~EntropyReader() noexcept;
+	
+	bool eof() const noexcept;
+	std::uint64_t value() const noexcept;
+	void next(const std::uint64_t start, const std::uint64_t end) throw(io_error);
 	
 private:
 	class HIDDEN Implementation;

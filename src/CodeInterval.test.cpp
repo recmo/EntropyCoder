@@ -199,7 +199,7 @@ TEST(UpdateExceptions)
 		// Invalid symbols
 		for(const Interval& symbol: invalid_symbols) {
 			CodeInterval updated = interval;
-			CHECK_THROW(updated.update(symbol), std::range_error);
+			CHECK_THROW(updated.update(symbol), CodeInterval::invalid_symbol);
 		}
 	}
 	
@@ -207,7 +207,7 @@ TEST(UpdateExceptions)
 	for(const CodeInterval& interval: non_normalized) {
 		for(const Interval& symbol: all) {
 			CodeInterval updated = interval;
-			CHECK_THROW(updated.update(symbol), std::range_error);
+			CHECK_THROW(updated.update(symbol), CodeInterval::not_normalized);
 		}
 	}
 }
@@ -282,13 +282,13 @@ TEST(DescaleExceptions)
 {
 	for(CodeInterval original: non_normalized) {
 		for(std::uint64_t value: all_values) {
-			CHECK_THROW(original.descale(value), std::range_error);
+			CHECK_THROW(original.descale(value), CodeInterval::not_normalized);
 		}
 	}
 	for(CodeInterval original: normalized) {
 		for(std::uint64_t value: all_values) {
 			if(!original.includes(value)) {
-				CHECK_THROW(original.descale(value), std::range_error);
+				CHECK_THROW(original.descale(value), CodeInterval::range_error);
 			}
 		}
 	}

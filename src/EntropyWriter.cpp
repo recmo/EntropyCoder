@@ -8,67 +8,64 @@
 #include <algorithm>
 namespace EntropyCoder {
 
-constexpr bool print = false;
-typedef std::uint64_t uint64;
-
 /******************************************************************************/
 
 class EntropyWriter::Implementation {
 public:
-	Implementation(std::ostream& output);
-	~Implementation();
+	Implementation(std::ostream& output) noexcept;
+	~Implementation() noexcept;
 	
-	void write(const Interval& symbol);
+	void write(const Interval& symbol) throw(io_error);
+	void finalize() throw(io_error);
 	
 private:
 	BinaryWriter bw;
 	CodeInterval current;
 	End end;
+	bool finalized = false;
 };
 
-EntropyWriter::EntropyWriter(std::ostream& output)
+EntropyWriter::EntropyWriter(std::ostream& output) throw(std::bad_alloc)
 : impl{new Implementation{output}}
 {
 }
 
-EntropyWriter::~EntropyWriter()
+EntropyWriter::~EntropyWriter() noexcept
 {
 	// Needs to be here because ~unique_ptr<Implementation>() needs to see
 	// the Implementation class.
 }
 
-void EntropyWriter::write(const uint64_t start, const uint64_t end)
+void EntropyWriter::write(const std::uint64_t start, const std::uint64_t end) throw(io_error)
 {
 	impl->write(Interval{start, end - start});
 }
 
+void EntropyWriter::finalize() throw(io_error)
+{
+	impl->finalize();
+}
+
 /******************************************************************************/
 
-EntropyWriter::Implementation::Implementation(std::ostream& output)
+EntropyWriter::Implementation::Implementation(std::ostream& output) noexcept
 : bw(output)
 {
 }
 
-EntropyWriter::Implementation::~Implementation()
+EntropyWriter::Implementation::~Implementation() noexcept
 {
-	if(end.carry_bit()) {
-		bw.add_carry();
-	}
-	uint64 value = end.value_bits();
-	while(value != 0) {
-		if(value & Interval::msb) {
-			bw.write_one();
-		} else {
-			bw.write_zero();
+	try {
+		if(!finalized) {
+			finalize();
 		}
-		value <<= 1;
+	}
+	catch(...) {
 	}
 }
 
-void EntropyWriter::Implementation::write(const Interval& symbol)
+void EntropyWriter::Implementation::write(const Interval& symbol) throw(io_error)
 {
-	if(print) std::cerr << "WRITE " << current << " " << symbol << "\n";
-	
 	// We didn't use the ending, so we should reserve it.
 	end.next();
 	
@@ -93,6 +90,24 @@ void EntropyWriter::Implementation::write(const Interval& symbol)
 	
 	// Generate a new potential ending
 	end.first(current);
+}
+
+void EntropyCoder::EntropyWriter::Implementation::finalize() throw(io_error)
+{
+	if(end.carry_bit()) {
+		bw.add_carry();
+	}
+	std::uint64_t value = end.value_bits();
+	while(value != 0) {
+		if(value & Interval::msb) {
+			bw.write_one();
+		} else {
+			bw.write_zero();
+		}
+		value <<= 1;
+	}
+	bw.finalize();
+	finalized = true;
 }
 
 } // namespace EntropyCoder

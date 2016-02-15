@@ -99,10 +99,10 @@ TEST(WithCarry)
 
 TEST(CheckCarryThrow)
 {
-	CHECK_THROW(write("c"), std::runtime_error);
-	CHECK_THROW(write("1 c"), std::runtime_error);
-	CHECK_THROW(write("1111 1111 1111 1111 c"), std::runtime_error);
-	CHECK_THROW(write("0111 1111 1111 1111 c c"), std::runtime_error);
+	CHECK_THROW(write("c"), BinaryWriter::invalid_carry);
+	CHECK_THROW(write("1 c"), BinaryWriter::invalid_carry);
+	CHECK_THROW(write("1111 1111 1111 1111 c"), BinaryWriter::invalid_carry);
+	CHECK_THROW(write("0111 1111 1111 1111 c c"), BinaryWriter::invalid_carry);
 }
 
 TEST(Bijective)

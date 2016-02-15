@@ -3,7 +3,7 @@
 #include <stdexcept>
 namespace EntropyCoder {
 
-End::End(End::State _state)
+End::End(End::State _state) throw(invalid_state)
 : state{_state}
 {
 	if(state == sS) {
@@ -13,16 +13,16 @@ End::End(End::State _state)
 	} else if(state == s1) {
 		ending = msb;
 	} else {
-		throw std::logic_error("Invalid state.");
+		throw invalid_state("Invalid state.");
 	}
 }
 
-End::End(End::State _state, uint64_t _ending)
+End::End(End::State _state, uint64_t _ending) throw(invalid_state)
 : ending{_ending}
 , state{_state}
 {
 	if(state == sS && ending >= msb) {
-		throw std::logic_error("Invalid state.");
+		throw invalid_state("Invalid state.");
 	}
 }
 
@@ -43,22 +43,22 @@ std::ostream& operator<<(std::ostream& out, const End& end)
 	return out;
 }
 
-bool End::operator==(const End& other) const
+bool End::operator==(const End& other) const noexcept
 {
 	return state == other.state && ending == other.ending;
 }
 
-void End::first(const CodeInterval& interval)
+void End::first(const CodeInterval& interval) throw(carry_inconsistent, overflow_error)
 {
 	if(state == sS && interval.wraps()) {
-		throw std::runtime_error("End is in carry-free state, but interval allows carry.");
+		throw carry_inconsistent("End is in carry-free state, but interval allows carry.");
 	}
 	while(!is_valid(interval)) {
 		next();
 	}
 }
 
-void End::next()
+void End::next() throw(overflow_error)
 {
 	if(state == sS && ending == 0) {
 		ending = msb >> 1;
@@ -74,18 +74,18 @@ void End::next()
 		ending += last_bit << 1;
 		if(ending == max) {
 			if(last_bit == 1) {
-				throw std::overflow_error("Overflow.");
+				throw overflow_error("Overflow.");
 			}
 			ending = last_bit >> 1;
 		}
 	}
 }
 
-void End::carry()
+void End::carry() throw(invalid_carry)
 {
 	const std::uint64_t last_bit = ending & ~(ending - 1);
 	if(state == sS) {
-		throw std::logic_error("Can not add carry in state S.");
+		throw invalid_carry("Can not add carry in state S.");
 	} else if(ending == 0) {
 		ending = state == s1 ? msb >> 1 : 0;
 	} else if(ending >= msb) {
@@ -96,7 +96,7 @@ void End::carry()
 	state = sS;
 }
 
-void End::zero()
+void End::zero() noexcept
 {
 	const std::uint64_t last_bit = ending & ~(ending - 1);
 	if(state == s1 && ending == msb) {
@@ -109,7 +109,7 @@ void End::zero()
 	state = s0;
 }
 
-void End::one()
+void End::one() noexcept
 {
 	const std::uint64_t last_bit = ending & ~(ending - 1);
 	if(ending == 0) {
@@ -125,7 +125,7 @@ void End::one()
 	state = state == sS ? sS : s1;
 }
 
-bool End::is_valid(const CodeInterval& interval)
+bool End::is_valid(const CodeInterval& interval) noexcept
 {
 	const bool carry = ending >= msb;
 	const std::uint64_t value = ending << 1;

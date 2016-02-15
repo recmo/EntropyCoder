@@ -20,12 +20,12 @@ std::ostream& operator<<(std::ostream& out, const Interval& interval)
 	return out;
 }
 
-Interval::Interval(double probability)
+Interval::Interval(double probability) throw(range_error)
 : base(0)
 , range(max)
 {
 	if(!std::isfinite(probability) || probability < 0.0 || probability > 1.0) {
-		throw std::range_error("Probabilities must be in the range [0,1].");
+		throw range_error("Probabilities must be in the range [0,1].");
 	}
 	
 	if(probability < 1.0) {
@@ -46,12 +46,12 @@ Interval::Interval(double probability)
 	assert(base + range >= base);
 }
 
-Interval::Interval(uint64 _base, uint64 _range)
+Interval::Interval(uint64 _base, uint64 _range) throw(range_error)
 : base(_base)
 , range(_range)
 {
 	if(range < 3 || base + range < range) {
-		throw std::range_error("Invalid range, range must be > 2 and base + range must be < 2^64.");
+		throw range_error("Invalid range, range must be > 2 and base + range must be < 2^64.");
 	}
 	
 	// Verify
@@ -59,22 +59,22 @@ Interval::Interval(uint64 _base, uint64 _range)
 	assert(base + range >= base);
 }
 
-bool Interval::operator==(const Interval& other) const
+bool Interval::operator==(const Interval& other) const noexcept
 {
 	return base == other.base && range == other.range;
 }
 
-double Interval::probability() const
+double Interval::probability() const noexcept
 {
 	return (static_cast<long double>(range) + 1.0L) * std::exp2(-64.0L);
 }
 
-double Interval::entropy() const
+double Interval::entropy() const noexcept
 {
 	return -std::log2(probability());
 }
 
-bool Interval::includes(Interval::uint64 value) const
+bool Interval::includes(Interval::uint64 value) const noexcept
 {
 	// If base + range overflows it is interpreted as wrapping around 2⁶⁴.
 	uint64 top = base + range + 1;
@@ -85,7 +85,7 @@ bool Interval::includes(Interval::uint64 value) const
 	}
 }
 
-bool Interval::includes(const Interval& interval) const
+bool Interval::includes(const Interval& interval) const noexcept
 {
 	// [l',h') ∊ [l,h) ⇔ l ≤ l' ∧ h' ≤ h
 	// [b',b'+r'+1) ∊ [b,b+r+1) ⇔ b ≤ b' ∧ b'+r' ≤ b+r
@@ -108,7 +108,7 @@ bool Interval::includes(const Interval& interval) const
 	}
 }
 
-bool Interval::overlaps(const Interval& interval) const
+bool Interval::overlaps(const Interval& interval) const noexcept
 {
 	// Ensure base ≤ interval.base
 	if(base > interval.base) {
@@ -127,7 +127,7 @@ bool Interval::overlaps(const Interval& interval) const
 	}
 }
 
-bool Interval::disjoint(const Interval& interval) const
+bool Interval::disjoint(const Interval& interval) const noexcept
 {
 	return !overlaps(interval);
 }

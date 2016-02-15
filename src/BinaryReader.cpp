@@ -3,13 +3,26 @@
 #include <stdexcept>
 namespace EntropyCoder {
 
-BinaryReader::BinaryReader(std::istream& input)
+BinaryReader::BinaryReader(std::istream& input) noexcept
 : in(input)
 {
+	// Store the original ostream::exceptions mask
+	original_state = in.exceptions();
+	
+	// ostream::put will set the badbit but not the failbit.
+	in.exceptions(std::ios_base::failbit | std::ios_base::badbit);
+	
+	// Call peek() to to update in.eof()
 	in.peek();
 }
 
-bool BinaryReader::eof() const
+BinaryReader::~BinaryReader() noexcept
+{
+	// Restore the ostream::exceptions mask to the original state
+	in.exceptions(original_state);
+}
+
+bool BinaryReader::eof() const noexcept
 {
 	static_assert(buffer_size == 8, "This code assumes one byte buffers.");
 	const uint8_t remaining_mask = mask == 0 ? 0 : mask | (mask - 1);
@@ -18,10 +31,10 @@ bool BinaryReader::eof() const
 	return !bits_remaing_in_buffer && byte_eof;
 }
 
-bool BinaryReader::read_bit()
+bool BinaryReader::read_bit() throw(read_beyond_end, io_error)
 {
 	if(eof()) {
-		throw std::runtime_error("Can not read beyond end of file.");
+		throw read_beyond_end("Can not read beyond end of file.");
 	}
 	
 	// Read from input
@@ -35,7 +48,7 @@ bool BinaryReader::read_bit()
 	return bit;
 }
 
-BinaryReader::uint8 BinaryReader::read_byte()
+BinaryReader::uint8 BinaryReader::read_byte() throw(io_error)
 {
 	if(!in.eof()) {
 		const uint8 byte = in.get();

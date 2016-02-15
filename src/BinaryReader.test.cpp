@@ -19,7 +19,7 @@ string read(const string input)
 			out.append(br.read_bit() ? "1" : "0");
 		}
 		CHECK(br.eof());
-		CHECK_THROW(br.read_bit(), std::runtime_error);
+		CHECK_THROW(br.read_bit(), BinaryReader::read_beyond_end);
 	}
 	CHECK(in.eof());
 	return out;

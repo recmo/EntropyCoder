@@ -9,17 +9,15 @@
 #include <iomanip>
 namespace EntropyCoder {
 
-constexpr bool print = false;
-
 /******************************************************************************/
 
 class EntropyReader::Implementation {
 public:
-	Implementation(std::istream& input);
+	Implementation(std::istream& input) throw(io_error);
 	
-	bool eof() const;
-	std::uint64_t read() const;
-	void read(const Interval& symbol);
+	bool eof() const noexcept;
+	std::uint64_t read() const noexcept;
+	void read(const Interval& symbol) throw(io_error);
 	
 private:
 	BinaryReader br;
@@ -29,35 +27,35 @@ private:
 	std::uint64_t past_end = 0;
 };
 
-EntropyReader::EntropyReader(std::istream& input)
+EntropyReader::EntropyReader(std::istream& input) throw(std::bad_alloc, io_error)
 : impl{new Implementation{input}}
 {
 }
 
-EntropyReader::~EntropyReader()
+EntropyReader::~EntropyReader() noexcept
 {
 	// Needs to be here because ~unique_ptr<Implementation>() needs to see
 	// the Implementation class.
 }
 
-bool EntropyReader::eof() const
+bool EntropyReader::eof() const noexcept
 {
 	return impl->eof();
 }
 
-std::uint64_t EntropyReader::value() const
+std::uint64_t EntropyReader::value() const noexcept
 {
 	return impl->read();
 }
 
-void EntropyReader::next(const uint64_t start, const uint64_t end)
+void EntropyReader::next(const uint64_t start, const uint64_t end) throw(io_error)
 {
 	return impl->read(Interval{start, end - start});
 }
 
 /******************************************************************************/
 
-EntropyReader::Implementation::Implementation(std::istream& input)
+EntropyReader::Implementation::Implementation(std::istream& input) throw(io_error)
 : br(input)
 {
 	for(uint i = 0; i < Interval::bits; ++i) {
@@ -68,7 +66,7 @@ EntropyReader::Implementation::Implementation(std::istream& input)
 	}
 }
 
-bool EntropyReader::Implementation::eof() const
+bool EntropyReader::Implementation::eof() const noexcept
 {
 	if(!br.eof()) {
 		return false;
@@ -76,18 +74,12 @@ bool EntropyReader::Implementation::eof() const
 	return value == end.value_bits();
 }
 
-std::uint64_t EntropyReader::Implementation::read() const
+std::uint64_t EntropyReader::Implementation::read() const noexcept
 {
-	std::uint64_t descaled = current.descale(value);
-	if(print) std::cerr << "READ " << current << " ";
-	if(print) std::cerr << "0x" << std::setw(16) << std::setfill('0') << std::hex;
-	if(print) std::cerr << value << " ";
-	if(print) std::cerr << "0x" << std::setw(16) << std::setfill('0') << std::hex;
-	if(print) std::cerr << descaled << "\n";
 	return current.descale(value);
 }
 
-void EntropyReader::Implementation::read(const Interval& symbol)
+void EntropyReader::Implementation::read(const Interval& symbol) throw(io_error)
 {
 	end.next();
 	if(current.update(symbol)) {

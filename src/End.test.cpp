@@ -79,8 +79,8 @@ TEST(ToString)
 TEST(IllegalConstruct)
 {
 	End::State illegal = (End::State)(10);
-	CHECK_THROW(End{illegal}, std::logic_error);
-	CHECK_THROW((End{End::sS, 0x8000000000000000UL}), std::logic_error);
+	CHECK_THROW(End{illegal}, End::invalid_state);
+	CHECK_THROW((End{End::sS, 0x8000000000000000UL}), End::invalid_state);
 }
 
 TEST(generate_state_S)
@@ -106,7 +106,7 @@ TEST(generate_state_S)
 	CHECK_EQUAL(make("S 0.111111111111111111111111111111111111111111111111111111111111111"), end);
 	
 	// Test overflow
-	CHECK_THROW(end.next(), std::overflow_error);
+	CHECK_THROW(end.next(), End::overflow_error);
 }
 
 TEST(generate_state_0)
@@ -132,7 +132,7 @@ TEST(generate_state_0)
 	CHECK_EQUAL(make("0 1.111111111111111111111111111111111111111111111111111111111111111"), end);
 	
 	// Test overflow
-	CHECK_THROW(end.next(), std::overflow_error);
+	CHECK_THROW(end.next(), End::overflow_error);
 }
 
 TEST(generate_state_1)
@@ -158,7 +158,7 @@ TEST(generate_state_1)
 	CHECK_EQUAL(make("1 1.111111111111111111111111111111111111111111111111111111111111111"), end);
 	
 	// Test overflow
-	CHECK_THROW(end.next(), std::overflow_error);
+	CHECK_THROW(end.next(), End::overflow_error);
 }
 
 TEST(interval_largest)
@@ -230,7 +230,7 @@ TEST(interval_half)
 	// half = [0.8000000000000000, 1.8000000000000000)
 	
 	// State S is invalid
-	CHECK_THROW(End{End::sS}.first(half), std::runtime_error);
+	CHECK_THROW(End{End::sS}.first(half), End::carry_inconsistent);
 	
 	// State 0
 	End end = End{End::s0}; end.first(half);
@@ -254,7 +254,7 @@ TEST(interval_wrap)
 	// wrap = [0.ffffffffffffffff, 1.ffffffffffffffff)
 	
 	// State S is invalid
-	CHECK_THROW(End{End::sS}.first(wrap), std::runtime_error);
+	CHECK_THROW(End{End::sS}.first(wrap), End::carry_inconsistent);
 	
 	// State 0
 	End end = End{End::s0}; end.first(wrap);
@@ -279,7 +279,7 @@ TEST(carry)
 	// 1. → 0.
 	
 	// State S doesn't support carry
-	CHECK_THROW(End{End::sS}.carry(), std::logic_error);
+	CHECK_THROW(End{End::sS}.carry(), End::invalid_carry);
 	
 	// State 0
 	End end;

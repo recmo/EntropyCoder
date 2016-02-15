@@ -2,23 +2,23 @@
 #include "Utilities.h"
 namespace EntropyCoder {
 
-bool CodeInterval::is_normalized() const
+bool CodeInterval::is_normalized() const noexcept
 {
 	return range >= msb;
 }
 
-bool CodeInterval::wraps() const
+bool CodeInterval::wraps() const noexcept
 {
 	return base + range < base;
 }
 
-Interval::uint64 CodeInterval::descale(Interval::uint64 value) const
+Interval::uint64 CodeInterval::descale(Interval::uint64 value) const throw(not_normalized, range_error)
 {
 	if(!is_normalized()) {
-		throw std::range_error("Interval must be normalized before descale.");
+		throw not_normalized("Interval must be normalized before descale.");
 	}
 	if(!includes(value)) {
-		throw std::range_error("Value not in interval.");
+		throw range_error("Value not in interval.");
 	}
 	
 	// value = (value - base) · 2⁶⁴ / (range + 1)
@@ -33,15 +33,13 @@ Interval::uint64 CodeInterval::descale(Interval::uint64 value) const
 	}
 }
 
-bool CodeInterval::update(const Interval& symbol)
+bool CodeInterval::update(const Interval& symbol) throw(not_normalized, invalid_symbol)
 {
 	if(!is_normalized()) {
-		throw std::range_error("Interval must be normalized before update.");
+		throw not_normalized("Interval must be normalized before update.");
 	}
-	
-	// Check the incoming range:
 	if(symbol.range < 3 || symbol.base + symbol.range < symbol.base) {
-		throw std::range_error("Invalid symbol interval.");
+		throw invalid_symbol("Invalid symbol interval.");
 	}
 	
 	// Calculate the new base
@@ -62,7 +60,7 @@ bool CodeInterval::update(const Interval& symbol)
 	return base < t;
 }
 
-std::pair<Interval::uint64, int> CodeInterval::normalize()
+std::pair<Interval::uint64, int> CodeInterval::normalize() noexcept
 {
 	const uint64 bits = base;
 	if(range == 0) {
