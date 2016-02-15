@@ -4,7 +4,7 @@
 #include <cstdint>
 namespace EntropyCoder {
 
-class EXPORT EntropyReader {
+class VISIBLE EntropyReader {
 public:
 	EntropyReader(std::istream& input);
 	~EntropyReader();
@@ -14,7 +14,7 @@ public:
 	void next(const std::uint64_t start, const std::uint64_t end);
 	
 private:
-	class Implementation;
+	class HIDDEN Implementation;
 	std::unique_ptr<Implementation> impl;
 };
 

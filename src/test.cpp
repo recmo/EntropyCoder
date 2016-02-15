@@ -3,7 +3,7 @@
 #include <iostream>
 #include <vector>
 #include <cstdlib>
-using std::cerr;
+using std::cout;
 using std::endl;
 
 namespace Ansi {
@@ -50,30 +50,30 @@ private:
 void MyTestReporter::ReportTestStart(UnitTest::TestDetails const& test)
 {
 	_currentFailed = false;
-	std::cerr << "Test   " << test.suiteName << "::" << test.testName << "..." << std::flush;
+	cout << "Test   " << test.suiteName << "::" << test.testName << "..." << std::flush;
 }
 
 void MyTestReporter::ReportFailure(UnitTest::TestDetails const& test, char const* failure)
 {
 	if(_currentFailed == false) {
-		cerr << " ";
-		cerr << Ansi::boldRed << "failed" << Ansi::normal << endl;
+		cout << " ";
+		cout << Ansi::boldRed << "failed" << Ansi::normal << endl;
 		_currentFailed  = true;
 	}
 	
-	cerr << Ansi::bold << test.filename << ":" << test.lineNumber << ": ";
-	cerr << Ansi::boldRed << "error: " << Ansi::bold;
-	cerr << "Test " <<  test.suiteName << "::" << test.testName  << " failed";
-	cerr << Ansi::normal << endl;
-	cerr << failure << endl << endl;
+	cout << Ansi::bold << test.filename << ":" << test.lineNumber << ": ";
+	cout << Ansi::boldRed << "error: " << Ansi::bold;
+	cout << "Test " <<  test.suiteName << "::" << test.testName  << " failed";
+	cout << Ansi::normal << endl;
+	cout << failure << endl << endl;
 }
 
 void MyTestReporter::ReportTestFinish(UnitTest::TestDetails const& test, float secondsElapsed)
 {
 	if(_currentFailed == false) {
-		cerr << " ";
-		cerr << Ansi::boldGreen << "succeeded" << Ansi::normal;
-		cerr << " in " << (secondsElapsed * 1.0e3) << " ms." << endl;
+		cout << " ";
+		cout << Ansi::boldGreen << "succeeded" << Ansi::normal;
+		cout << " in " << (secondsElapsed * 1.0e3) << " ms." << endl;
 	}
 }
 
@@ -82,21 +82,21 @@ void MyTestReporter::ReportSummary(
 	int const failureCount, float const secondsElapsed)
 {
 	if (failureCount > 0) {
-		cerr << "Test   ";;
-		cerr << failedTestCount << " out of " << totalTestCount << " tests ";
-		cerr << Ansi::boldRed << "failed" << Ansi::normal;
-		cerr << " in " << (secondsElapsed * 1.0e3) << " ms." << endl;
+		cout << "Test   ";;
+		cout << failedTestCount << " out of " << totalTestCount << " tests ";
+		cout << Ansi::boldRed << "failed" << Ansi::normal;
+		cout << " in " << (secondsElapsed * 1.0e3) << " ms." << endl;
 	} else {
-		cerr << "Test   " << totalTestCount << " tests ";
-		cerr << Ansi::boldGreen << "succeeded" << Ansi::normal;
-		cerr << " in " << (secondsElapsed * 1.0e3) << " ms." << endl;
+		cout << "Test   " << totalTestCount << " tests ";
+		cout << Ansi::boldGreen << "succeeded" << Ansi::normal;
+		cout << " in " << (secondsElapsed * 1.0e3) << " ms." << endl;
 	}
 }
 
 int main(int argc, char* argv[])
 {
 	Ansi::enable();
-	cerr << "Test   " << NAME << " version " << VERSION << endl;
+	cout << "Test   " << NAME << " version " << VERSION << endl;
 	MyTestReporter myReporter;
 	UnitTest::TestRunner runner(myReporter);
 	return runner.RunTestsIf(UnitTest::Test::GetTestList(), NULL, UnitTest::True(), 0);

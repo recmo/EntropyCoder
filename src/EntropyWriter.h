@@ -4,7 +4,7 @@
 #include <cstdint>
 namespace EntropyCoder {
 
-class EXPORT EntropyWriter {
+class VISIBLE EntropyWriter {
 public:
 	EntropyWriter(std::ostream& output);
 	~EntropyWriter();
@@ -12,7 +12,7 @@ public:
 	void write(const std::uint64_t start, const std::uint64_t end);
 	
 private:
-	class Implementation;
+	class HIDDEN Implementation;
 	std::unique_ptr<Implementation> impl;
 };
 

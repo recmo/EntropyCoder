@@ -1,35 +1,38 @@
 name      := EntropyCoder
-packages  := unittest++
+packages  :=
 
 flags     ?= -O2 -march=native -g
-sanitize  ?= undefined leak
+sanitize  ?=
 prefix    ?= /usr/local
 
 ################################################################################
 
-sources   := $(shell find src -name *.cpp ! -name *.test.cpp)
+sources   := $(shell find src -name *.cpp)
 headers   := $(shell find src -name *.h)
-tests     := $(shell find src -name *.test.cpp)
+tests     := src/test.cpp $(shell find src -name *.test.cpp)
+sources   := $(filter-out $(tests),$(sources))
 objects   := $(patsubst src/%.cpp,build/%.o, $(sources))
 gcda      := $(patsubst src/%.cpp,build/%.inst.gcda,$(sources) $(test))
 clang     := $(findstring clang,${CXX})
 flags     += $(if $(packages), $(shell pkg-config --cflags $(packages)))
 flags     += -DVERSION=\"$(shell git show --pretty=format:%h -q HEAD)\"
-flags     += -DNAME=\"$(name)\" -std=c++11 -Isrc -fPIE -Wall -Wextra 
+flags     += -DNAME=\"$(name)\" -std=c++11 -Isrc -fPIC -Wall -Wextra
 flags     += -Wno-unused-parameter -Werror=return-type -Werror=switch
 flags     += -ftemplate-backtrace-limit=0 -flto
 flags     += -fvisibility-inlines-hidden -fvisibility=hidden
-flags     += -DEXPORT=__attribute__\(\(visibility\(\"default\"\)\)\)
+flags     += -DVISIBLE=__attribute__\(\(visibility\(\"default\"\)\)\)
+flags     += -DHIDDEN=__attribute__\(\(visibility\(\"hidden\"\)\)\)
 inst      := $(patsubst %,-fsanitize=%,$(sanitize))
 inst      += $(if $(clang),-fsanitize-blacklist=sanitize-blacklist.txt,)
 inst      += $(if $(clang),-fprofile-arcs -ftest-coverage,--coverage)
-libs      += -pie -fuse-ld=gold
+inst      += $(shell pkg-config --cflags unittest++)
+libs      += -fuse-ld=gold
 libs      += $(if $(packages), $(shell pkg-config --libs $(packages)))
 pch       := $(if $(clang),-include-pch build/pch.h.gch,-include build/pch.h)
 all       :  build run-tests
-build     :  lib$(name).so test
+build     :  lib$(name).so
 coverage  :  coverage/src/index.html
-run-tests :  build/test
+check     :  build/check
 print-%   :  ; @echo $* = $($*)
 .PHONY    :  build run-tests clean coverage
 .SECONDARY:
@@ -69,12 +72,11 @@ lib$(name).so: $(objects)
 test: $(patsubst src/%.cpp,build/%.inst.o,$(tests)) \
 	$(patsubst %.o,%.inst.o,$(objects)) build/test.inst.o
 	@echo "Link  " $@
-	@${CXX} $(flags) $(inst) $^ $(libs) -o $@
+	@${CXX} $(flags) $(inst) $^ $(libs) $(shell pkg-config --libs unittest++) -o $@
 
-build/test: test
+build/check: test
 	@echo "Test  " $(name)
-	@ASAN_OPTIONS=detect_odr_violation=1 ./$<
-	@touch $<
+	@ASAN_OPTIONS=detect_odr_violation=1 ./$< | tee $@
 
 coverage/src/index.html: build/test
 	@echo "Lcov  " test
