@@ -150,4 +150,30 @@ TEST(Bijective)
 	}
 }
 
+TEST(AlreadyFinalized)
+{
+	std::ostringstream out;
+	{
+		BinaryWriter bw(out);
+		bw.finalize();
+		CHECK_THROW(bw.write_zero(), BinaryWriter::already_finalized);
+	}
+	{
+		BinaryWriter bw(out);
+		bw.finalize();
+		CHECK_THROW(bw.write_one(), BinaryWriter::already_finalized);
+	}
+	{
+		BinaryWriter bw(out);
+		bw.finalize();
+		bw.write_zero();
+		CHECK_THROW(bw.add_carry(), BinaryWriter::already_finalized);
+	}
+	{
+		BinaryWriter bw(out);
+		bw.finalize();
+		CHECK_THROW(bw.finalize(), BinaryWriter::already_finalized);
+	}
+}
+
 }
