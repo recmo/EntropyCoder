@@ -100,8 +100,8 @@ void encode()
 	initialize();
 	EntropyWriter ew(std::cout);
 	uint c = 0;
-	while(!std::cin.eof()) {
-		std::uint8_t byte = std::cin.get();
+	for(auto result = std::cin.get(); result != std::istream::traits_type::eof(); result = std::cin.get()) {
+		std::uint8_t byte = result;
 		ew.write(ranges[byte], ranges[byte + 1] - 1);
 		update_frequencies(byte);
 		if(++c % 10000 == 0) {
