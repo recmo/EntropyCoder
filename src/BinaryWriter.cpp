@@ -14,19 +14,14 @@ BinaryWriter::BinaryWriter(std::ostream& output) noexcept
 
 BinaryWriter::~BinaryWriter() noexcept
 {
-	try {
-		// Try to finalize if the user hasn't called `finalize()`
-		// We do this as a courtesy, but really the user should call `finalize()`
-		if(!finalized) {
-			finalize();
-		}
-		
-		// Restore the ostream::exceptions mask to the original state
-		out.exceptions(original_state);
+	// Try to finalize if the user hasn't called `finalize()`
+	// We do this as a courtesy, but really the user should call `finalize()`
+	if(!finalized) {
+		finalize();
 	}
-	catch(...) {
-		// Destructors should never throw
-	}
+	
+	// Restore the ostream::exceptions mask to the original state
+	out.exceptions(original_state);
 }
 
 void BinaryWriter::write_zero() throw(already_finalized, io_error)
