@@ -30,11 +30,10 @@ pch       := $(if $(clang),-include-pch build/pch.h.gch,-include build/pch.h)
 all       :  build
 build     :  $(if $(install_h),lib$(name).so build/$(name).pc \
              $(patsubst src/%.h,build/%.h,$(install_h)),$(name))
-check     :  build/unittest.out
-coverage  :  coverage/src/index.html
+check     :  build/unittest.out ## Run the unit test
+coverage  :  coverage/src/index.html ## Measure the code coverage of the units tests
 install   :  install-$(name).pc install-lib$(name).so \
              $(patsubst src/%.h,install-%.h,$(install_h))
-print-%   :  ; @echo $* = $($*)
 .PHONY    :  all build check clean coverage install
 .SECONDARY:
 -include    $(patsubst src/%.cpp, build/%.d, $(sources))
@@ -94,7 +93,7 @@ coverage/src/index.html: build/unittest.out
 	@genhtml --quiet --title "$(name)" --legend --num-spaces 4 \
 		--output-directory coverage build/lcov
 
-view-coverage: coverage/src/index.html
+view-coverage: coverage/src/index.html ## View code coverage in the default browser
 	@echo "Open  " $^
 	@xdg-open $^
 
@@ -128,6 +127,13 @@ install-%.py: src/%.py
 	@echo "Inst  " $(prefix)/lib/pkgconfig/$(notdir $<)
 	@install -C -D $< $(prefix)/lib/pkgconfig/$(notdir $<)
 
-clean:
+clean: ## Remove all generated files
 	@echo "Clean  " $(name)
 	@rm -Rf build coverage unittest $(name) lib$(name).so
+
+print-%: ## Print the value of variable % (for debugging Makefiles)
+	@echo $* = $($*)
+
+# http://marmelab.com/blog/2016/02/29/auto-documented-makefile.html
+help: ## Show makefile help
+	@grep -hE '^[a-zA-Z_-% ]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
