@@ -92,19 +92,138 @@ TEST(Empty)
 	CHECK_EQUAL("", out.str());
 }
 
+std::string unary(uint n)
+{
+	std::ostringstream out;
+	CHECK(out.good());
+	{
+		EntropyWriter bw(out);
+		for(uint i = 0; i < n; ++i) {
+			bw.write(i0F.base, i0F.base + i0F.range);
+		}
+	}
+	CHECK(out.good());
+	out.flush();
+	return out.str();
+}
+
+TEST(UnaryCode)
+{
+	// 1…10
+	CHECK_EQUAL("", unary(0));
+	CHECK_EQUAL("\x80", unary(1));
+	CHECK_EQUAL("\x40", unary(2));
+	CHECK_EQUAL("\xC0", unary(3));
+	CHECK_EQUAL("\x20", unary(4));
+	CHECK_EQUAL("\x60", unary(5));
+	CHECK_EQUAL("\xA0", unary(6));
+	CHECK_EQUAL("\xE0", unary(7));
+	CHECK_EQUAL("\x10", unary(8));
+	CHECK_EQUAL("\x30", unary(9));
+	CHECK_EQUAL("\x50", unary(10));
+	
+	// 2ⁿ (Note that a final 0x80 is implicit when the output ends on 0x00)
+	CHECK_EQUAL("\x08", unary(16));
+	CHECK_EQUAL("\x04", unary(32));
+	CHECK_EQUAL("\x02", unary(64));
+	CHECK_EQUAL("\x01", unary(128));
+	CHECK_EQUAL((std::string{0x00}), unary(256)); // The 0x80 is implicit
+	CHECK_EQUAL((std::string{0x00, 0x40}), unary(512));
+	CHECK_EQUAL((std::string{0x00, 0x20}), unary(1024));
+	CHECK_EQUAL((std::string{0x00, 0x10}), unary(2048));
+	CHECK_EQUAL((std::string{0x00, 0x08}), unary(4096));
+	CHECK_EQUAL((std::string{0x00, 0x04}), unary(8192));
+	CHECK_EQUAL((std::string{0x00, 0x02}), unary(16384));
+	CHECK_EQUAL((std::string{0x00, 0x01}), unary(32768));
+	CHECK_EQUAL((std::string{0x00, 0x00}), unary(65536));
+	CHECK_EQUAL((std::string{0x00, 0x00, 0x40}), unary(131072));
+	CHECK_EQUAL((std::string{0x00, 0x00, 0x20}), unary(262144));
+	
+	// 10ⁿ
+	CHECK_EQUAL("\x92", unary(100));
+	CHECK_EQUAL("\xF4\x40", unary(1000));
+	CHECK_EQUAL("\x38\x84", unary(10000));
+	CHECK_EQUAL("\x86\xA0\x80", unary(100000));
+	CHECK_EQUAL("\xE8\x48\x10", unary(1000000));
+}
+
+std::string oneSymbol(const Interval& symbol)
+{
+	std::ostringstream out;
+	CHECK(out.good());
+	{
+		EntropyWriter bw(out);
+		bw.write(symbol.base, symbol.base + symbol.range);
+	}
+	CHECK(out.good());
+	out.flush();
+	return out.str();
+}
+
 TEST(OneSymbol)
 {
-	for(const Interval& a: valid_symbols) {
-		std::ostringstream out;
-		CHECK(out.good());
-		{
-			EntropyWriter bw(out);
-			bw.write(a.base, a.base + a.range);
-		}
-		out.flush();
-		CHECK(out.good());
-		// CHECK_EQUAL("", out.str());
-	}
+	// i03, i05, i07, i08, i09, i0A, i0E, i0F
+	// TODO: Are these really the shortest possible?
+	CHECK_EQUAL((std::string{0, 0, 0, 0, 0, 0, 0, 2}), oneSymbol(i03));
+	CHECK_EQUAL("\x40", oneSymbol(i05));
+	CHECK_EQUAL("\x40", oneSymbol(i07));
+	CHECK_EQUAL("\x80", oneSymbol(i08));
+	CHECK_EQUAL("\x80", oneSymbol(i09));
+	CHECK_EQUAL("\x80", oneSymbol(i0A));
+	CHECK_EQUAL("\x80", oneSymbol(i0E));
+	CHECK_EQUAL("\x80", oneSymbol(i0F));
+	
+	// i13, i15, i17, i18, i19, i1A, i1E
+	CHECK_EQUAL((std::string{0, 0, 0, 0, 0, 0, 0, 4}), oneSymbol(i13));
+	CHECK_EQUAL("\x40", oneSymbol(i15));
+	CHECK_EQUAL("\x80", oneSymbol(i17));
+	CHECK_EQUAL("\x80", oneSymbol(i18));
+	CHECK_EQUAL("\x80", oneSymbol(i19));
+	CHECK_EQUAL("\x80", oneSymbol(i1A));
+	CHECK_EQUAL("\x80", oneSymbol(i1E));
+	
+	// i23, i25, i27, i28, i29, i2A
+	CHECK_EQUAL((std::string{0, 0, 0, 0, 0, 0, 0, 4}), oneSymbol(i23));
+	CHECK_EQUAL("\x40", oneSymbol(i25));
+	CHECK_EQUAL("\x80", oneSymbol(i27));
+	CHECK_EQUAL("\x80", oneSymbol(i28));
+	CHECK_EQUAL("\x80", oneSymbol(i29));
+	CHECK_EQUAL("\x80", oneSymbol(i2A));
+	
+	// i33, i35, i37, i38, i39, i3A
+	CHECK_EQUAL((std::string{0, 0, 0, 0, 0, 0, 0, 4}), oneSymbol(i33));
+	CHECK_EQUAL("\x40", oneSymbol(i25));
+	CHECK_EQUAL("\x80", oneSymbol(i27));
+	CHECK_EQUAL("\x80", oneSymbol(i28));
+	CHECK_EQUAL("\x80", oneSymbol(i29));
+	CHECK_EQUAL("\x80", oneSymbol(i2A));
+	
+	// i53, i55, i57, i58, i59, i5A
+	CHECK_EQUAL("\x55\x55\x55\x55\x55\x55\x55\x58", oneSymbol(i53));
+	CHECK_EQUAL("\x80", oneSymbol(i55));
+	CHECK_EQUAL("\x80", oneSymbol(i57));
+	CHECK_EQUAL("\x80", oneSymbol(i58));
+	CHECK_EQUAL("\x80", oneSymbol(i59));
+	CHECK_EQUAL("\x80", oneSymbol(i5A));
+	
+	// i73, i75, i77, i78,
+	CHECK_EQUAL("\x80", oneSymbol(i73));
+	CHECK_EQUAL("\x80", oneSymbol(i75));
+	CHECK_EQUAL("\x80", oneSymbol(i77));
+	CHECK_EQUAL("\x80", oneSymbol(i78));
+	
+	// i83, i85, i87,
+	CHECK_EQUAL("\x80", oneSymbol(i83));
+	CHECK_EQUAL("\x80", oneSymbol(i85));
+	CHECK_EQUAL("\x80", oneSymbol(i87));
+	
+	// i93, i95,
+	CHECK_EQUAL((std::string{'\x80', 0, 0, 0, 0, 0, 0, 0x04}), oneSymbol(i93));
+	CHECK_EQUAL("\xC0", oneSymbol(i95));
+	
+	// iA3, iA5,
+	CHECK_EQUAL("\xAA\xAA\xAA\xAA\xAA\xAA\xAA\xAC", oneSymbol(iA3));
+	CHECK_EQUAL("\xC0", oneSymbol(iA5));
 }
 
 TEST(TwoSymbols)

@@ -165,8 +165,8 @@ TEST(AlreadyFinalized)
 	}
 	{
 		BinaryWriter bw(out);
-		bw.finalize();
 		bw.write_zero();
+		bw.finalize();
 		CHECK_THROW(bw.add_carry(), BinaryWriter::already_finalized);
 	}
 	{
