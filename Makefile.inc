@@ -34,6 +34,7 @@ check     :  build/unittest.out ## Run the unit test
 coverage  :  coverage/src/index.html ## Measure the code coverage of the units tests
 install   :  install-$(name).pc install-lib$(name).so \
              $(patsubst src/%.h,install-%.h,$(install_h))
+MAKEFLAGS += -j $(shell nproc)
 .PHONY    :  all build check clean coverage install
 .SECONDARY:
 -include    $(patsubst src/%.cpp, build/%.d, $(sources))
