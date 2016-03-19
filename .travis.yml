@@ -1,4 +1,7 @@
 language: cpp
+compiler:
+  - clang
+  - gcc
 env:
    -
    - sanitize="undefined leak" target="check"
